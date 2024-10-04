@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/homeFragment"
+        android:icon="@drawable/icon_home"
+        android:title="@string/home"/>
+
+    <item
+        android:id="@+id/rangkingsFragment"
+        android:icon="@drawable/icon_rangkings"
+        android:title="@string/rangkings" />
+
+<!--    <item-->
+<!--        android:id="@+id/recordFragment"-->
+<!--        android:icon="@drawable/icon_record"-->
+<!--        android:title="@string/record" />-->
+
+    <item
+        android:id="@+id/placeholder"
+        android:title="" />
+
+    <item
+        android:id="@+id/deviceFragment"
+        android:icon="@drawable/icon_device"
+        android:title="@string/device" />
+
+    <item
+        android:id="@+id/profileFragment"
+        android:icon="@drawable/icon_profile"
+        android:title="@string/profile" />
+
+</menu>

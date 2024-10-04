@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_navigation"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.dicoding.hanebado.view.dashboard.home.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home"/>
+
+    <fragment
+        android:id="@+id/rangkingsFragment"
+        android:name="com.dicoding.hanebado.view.dashboard.rangkings.RangkingsFragment"
+        android:label="fragment_rangkings"
+        tools:layout="@layout/fragment_rangkings" />
+
+
+    <fragment
+        android:id="@+id/deviceFragment"
+        android:name="com.dicoding.hanebado.view.dashboard.device.DeviceFragment"
+        android:label="fragment_device"
+        tools:layout="@layout/fragment_device" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.dicoding.hanebado.view.dashboard.profile.ProfileFragment"
+        android:label="fragment_profile"
+        tools:layout="@layout/fragment_profile" />
+</navigation>

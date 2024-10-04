@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">Hanebado</string>
+    <string name="profile">Profile</string>
+    <string name="email">Email</string>
+    <string name="login_account">Login in to Hanebado</string>
+    <string name="register_account">Create an account</string>
+    <string name="enter_email">Email</string>
+    <string name="enter_pass">Password</string>
+    <string name="enter_pass_confirm">Confimation</string>
+    <string name="password">Kata Sandi</string>
+    <string name="password_confirm">Konfirmasi Kata Sandi</string>
+    <string name="login">Log in</string>
+    <string name="account_no">Belum memiliki akun?</string>
+    <string name="account_yes">Sudah memiliki akun?</string>
+    <string name="register_here">Daftar disini</string>
+    <string name="login_here">Masuk disini</string>
+    <string name="wrong_email_format">Format email salah</string>
+    <string name="wrong_password_format">Password terdiri atas 8 karakter</string>
+    <string name="diff_password">Pastikan password tidak sama</string>
+    <string name="register">Join for free</string>
+    <string name="title_welcome_page">Selamat Datang</string>
+    <string name="message_welcome_page">Lorem ipsum dolor sit amet consectetur. Tellus eget sed feugiat faucibus lectus vitae sem donec consequat</string>
+    <string name="check_internet">Pastikan kembali jaringan internet anda</string>
+    <string name="check_data">Pastikan email dan password telah benar</string>
+    <string name="login_success">Login telah berhasil</string>
+    <string name="password_mismatch">Masukan password yang sama</string>
+    <string name="name">Nama</string>
+    <string name="enter_name">Masukan Nama</string>
+    <string name="register_success">Pendaftaran berhasil silahkan login</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="home">home</string>
+    <string name="rangkings">rangkings</string>
+    <string name="record">record</string>
+    <string name="device">device</string>
+</resources>

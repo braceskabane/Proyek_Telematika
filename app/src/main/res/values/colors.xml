@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="dark_grey">#B1B1B1</color>
+    <color name="grey">#F8F8F8</color>
+    <color name="grey_bg">#FFF4F5F6</color>
+    <color name="grey_navbar">#FFC6CCD1</color>
+    <color name="light_grey">#F3F3F3</color>
+
+    <color name="red">#FFE8254E</color>
+    <color name="red_100">#E22931</color>
+
+    <color name="transparent">#00000000</color>
+
+
+    <color name="orange_100">#FF6529</color>
+    <color name="orange_25">#40FF6529</color>
+    <color name="light_grey_100">#F2F1F0</color>
+    <color name="light_green">#C7EFE5</color>
+
+
+
+    <color name="silver">#C2C2C2</color>
+    <color name="grey_stroke">#E0E0E0</color>
+
+    <color name="strava">#141412</color>
+    <color name="navbar_bottom">#262626</color>
+</resources>

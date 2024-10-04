@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">Membership</string>
+    <string name="profile">Profil</string>
+    <string name="email">Email</string>
+    <string name="login_account">Masuk \nAkun Anda</string>
+    <string name="register_account">Daftarkan \nAkun Anda</string>
+    <string name="enter_email">Masukan alamat email</string>
+    <string name="enter_pass">Masukan kata sandi</string>
+    <string name="enter_pass_confirm">Masukan konfirmasi kata sandi</string>
+    <string name="password">Kata Sandi</string>
+    <string name="password_confirm">Konfirmasi Kata Sandi</string>
+    <string name="login">Masuk</string>
+    <string name="account_no">Belum memiliki akun?</string>
+    <string name="account_yes">Sudah memiliki akun?</string>
+    <string name="register_here">Daftar disini</string>
+    <string name="login_here">Masuk disini</string>
+    <string name="wrong_email_format">Format email salah</string>
+    <string name="wrong_password_format">Password terdiri atas 8 karakter</string>
+    <string name="register">Daftar</string>
+    <string name="title_welcome_page">Selamat Datang</string>
+    <string name="message_welcome_page">Lorem ipsum dolor sit amet consectetur. Tellus eget sed feugiat faucibus lectus vitae sem donec consequat</string>
+    <string name="check_internet">Pastikan kembali jaringan internet anda</string>
+    <string name="check_data">Pastikan email dan password telah benar</string>
+    <string name="password_mismatch">Masukan password yang sama</string>
+    <string name="name">Nama</string>
+    <string name="enter_name">Masukan Nama</string>
+    <string name="register_success">Pendaftaran berhasil silahkan login</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="history">Riwayat\n</string>
+    <string name="promo">Promo\n</string>
+    <string name="home">Beranda\n</string>
+    <!-- Strings used for fragments for navigation -->
+
+    <string name="register_member">Isi Data \nDiri Anda</string>
+
+</resources>
