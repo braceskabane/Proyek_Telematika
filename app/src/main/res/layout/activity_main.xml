@@ -23,14 +23,14 @@
 
     <com.google.android.material.bottomappbar.BottomAppBar
         style="@style/CustomBottomAppBar"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_margin="0dp"
         android:id="@+id/bottomAppBar"
-        app:fabCradleMargin="10dp"
-        app:fabCradleRoundedCornerRadius="10dp"
-        app:fabCradleVerticalOffset="10dp">
+        app:fabCradleMargin="12dp"
+        app:fabCradleRoundedCornerRadius="20dp"
+        app:fabCradleVerticalOffset="5dp"
+        app:hideOnScroll="true">
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -42,8 +42,7 @@
             app:itemRippleColor="@color/transparent"
             app:itemTextAppearanceActive="@style/BottomNavigationLabelStyle"
             app:itemTextAppearanceInactive="@style/BottomNavigationLabelStyle"
-            app:itemTextColor="@drawable/custom_navbar_bottom"
-            app:labelVisibilityMode="labeled">
+            app:itemTextColor="@drawable/custom_navbar_bottom">
         </com.google.android.material.bottomnavigation.BottomNavigationView>
     </com.google.android.material.bottomappbar.BottomAppBar>
 
@@ -51,7 +50,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/fb_record"
-        android:src="@drawable/icon_record"
+        android:src="@drawable/icon_start"
         android:backgroundTint="@color/red_100"
         app:borderWidth="0dp"
         app:layout_anchor="@id/bottomAppBar"

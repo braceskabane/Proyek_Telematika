@@ -12,6 +12,10 @@
 
     <color name="red">#FFE8254E</color>
     <color name="red_100">#E22931</color>
+    <color name="calory">#fb680e</color>
+    <color name="steps">#f1ac04</color>
+    <color name="reflex">#5f65fb</color>
+    <color name="anticipation">#04c5a2</color>
 
     <color name="transparent">#00000000</color>
 
@@ -20,6 +24,8 @@
     <color name="orange_25">#40FF6529</color>
     <color name="light_grey_100">#F2F1F0</color>
     <color name="light_green">#C7EFE5</color>
+
+    <color name="green">#18b752</color>
 
 
 

@@ -95,6 +95,9 @@ dependencies {
     implementation(libs.glide)
     ksp(libs.glide.compiler)
 
+    // Circle Image
+    implementation(libs.circleimageview)
+
     // LeakCanary
 //    implementation(libs.leakcanary)
 

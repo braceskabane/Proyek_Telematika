@@ -30,6 +30,7 @@ glide = "4.15.1"
 dagger = "2.30.1"
 featureDeliveryKtx = "2.1.0"
 circleindicator = "2.1.6"
+circleimageview = "3.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -75,6 +76,8 @@ circleindicator = { group = "me.relex", name = "circleindicator", version.ref = 
 security-crypto = { module = "androidx.security:security-crypto", version = "1.1.0-alpha06" }
 secure-preferences-lib = { module = "com.scottyab:secure-preferences-lib", version = "0.1.7" }
 sqlcipher = { module = "net.zetetic:android-database-sqlcipher", version = "4.5.0" }
+circleimageview = { group = "de.hdodenhof", name = "circleimageview", version.ref = "circleimageview" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

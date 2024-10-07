@@ -8,8 +8,8 @@
 
     <item
         android:id="@+id/rangkingsFragment"
-        android:icon="@drawable/icon_rangkings"
-        android:title="@string/rangkings" />
+        android:icon="@drawable/icon_history"
+        android:title="@string/history" />
 
 <!--    <item-->
 <!--        android:id="@+id/recordFragment"-->
@@ -22,8 +22,8 @@
 
     <item
         android:id="@+id/deviceFragment"
-        android:icon="@drawable/icon_device"
-        android:title="@string/device" />
+        android:icon="@drawable/icon_daily_plan"
+        android:title="@string/plan" />
 
     <item
         android:id="@+id/profileFragment"

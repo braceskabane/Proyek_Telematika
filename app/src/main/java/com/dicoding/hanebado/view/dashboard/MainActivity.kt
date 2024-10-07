@@ -51,8 +51,8 @@ class MainActivity : AppCompatActivity(){
         val appBarConfiguration = AppBarConfiguration.Builder(
             setOf(
                 R.id.homeFragment,
-                R.id.rangkingsFragment,
-                R.id.deviceFragment,
+                R.id.historyFragment,
+                R.id.dailyplanFragment,
                 R.id.profileFragment
             )
         ).build()
@@ -65,11 +65,11 @@ class MainActivity : AppCompatActivity(){
                 R.id.homeFragment -> {
                     navViewController.navigate(R.id.homeFragment)
                 }
-                R.id.rangkingsFragment -> {
-                    navViewController.navigate(R.id.rangkingsFragment)
+                R.id.historyFragment -> {
+                    navViewController.navigate(R.id.historyFragment)
                 }
-                R.id.deviceFragment -> {
-                    navViewController.navigate(R.id.deviceFragment)
+                R.id.dailyplanFragment -> {
+                    navViewController.navigate(R.id.dailyplanFragment)
                 }
                 R.id.profileFragment -> {
                     navViewController.navigate(R.id.profileFragment)

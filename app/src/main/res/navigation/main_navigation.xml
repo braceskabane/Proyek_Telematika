@@ -12,17 +12,17 @@
         tools:layout="@layout/fragment_home"/>
 
     <fragment
-        android:id="@+id/rangkingsFragment"
-        android:name="com.dicoding.hanebado.view.dashboard.rangkings.RangkingsFragment"
+        android:id="@+id/historyFragment"
+        android:name="com.dicoding.hanebado.view.dashboard.history.HistoryFragment"
         android:label="fragment_rangkings"
-        tools:layout="@layout/fragment_rangkings" />
+        tools:layout="@layout/fragment_history" />
 
 
     <fragment
-        android:id="@+id/deviceFragment"
-        android:name="com.dicoding.hanebado.view.dashboard.device.DeviceFragment"
+        android:id="@+id/dailyplanFragment"
+        android:name="com.dicoding.hanebado.view.dashboard.plan.DailyPlanFragment"
         android:label="fragment_device"
-        tools:layout="@layout/fragment_device" />
+        tools:layout="@layout/fragment_daily_plan" />
 
     <fragment
         android:id="@+id/profileFragment"
