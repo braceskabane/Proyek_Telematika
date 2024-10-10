@@ -18,6 +18,12 @@
         android:theme="@style/AppTheme.Hanebado"
         tools:targetApi="31">
         <activity
+            android:name=".view.dashboard.home.DetailProgressWorkoutActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.dashboard.history.workout.detail.DatailHistoryWorkoutActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.dashboard.record.RecordActivity"
             android:exported="false"
             android:theme="@style/AppTheme.Hanebado" />

@@ -6,22 +6,23 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@drawable/custom_background_home_daily_plan"
-    android:layout_marginTop="10dp"
+    android:backgroundTint="@color/strava"
     android:padding="16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <TextView
-                style="@style/textStyleMedium_16"
+                style="@style/textStyleSemIBold_16"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bodyweight Upper Body"
+                android:text="Upper Body"
                 android:textColor="@color/white"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -30,13 +31,6 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/dark_grey"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/container_sport_category"
@@ -47,8 +41,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             tools:ignore="MissingConstraints"
-            tools:listitem="@layout/item_daily_categorize_motion_home"
+            tools:listitem="@layout/item_detail_history_workout_categorize_motion"
             tools:itemCount="2"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </LinearLayout>

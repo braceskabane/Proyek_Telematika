@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="450dp"
+    android:background="@drawable/custom_background_dialog_bottom"
+    android:padding="12dp">
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_add_tag_yes"
+        style="@style/textStyleSemIBold_14"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:text="Back"
+        android:textAllCaps="false"
+        android:textColor="@color/red"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@+id/btn_add_tag_yes"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:layout_width="216dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_gravity="center"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/custom_background_home_daily_plan">
+                <TextView
+                    style="@style/textStyleSemIBold_14"
+                    android:id="@+id/tvPushUp"
+                    android:layout_weight="0.5"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Push  up"
+                    android:textColor="@color/white" />
+
+                <ImageView
+                    style="@style/textStyleSemIBold_14"
+                    android:id="@+id/ivStatusPushUp"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_weight="0.1"
+                    android:src="@drawable/icon_done"
+                    android:gravity="end"
+                    android:layout_gravity="center_vertical"
+                    android:background="@null"
+                    android:paddingEnd="8dp"
+                    app:endIconMode="clear_text"
+                    android:inputType="text"
+                    app:tint="@color/green" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/dark_grey"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginStart="16dp">
+                <TextView
+                    style="@style/textStyleSemIBold_14"
+                    android:id="@+id/tvSetPushUp"
+                    android:layout_weight="0.5"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Set"
+                    android:textColor="@color/white" />
+                <EditText
+                    style="@style/textStyleSemIBold_14"
+                    android:id="@+id/etSetPushUp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_weight="1"
+                    android:hint="3"
+                    android:textColor="@color/dark_grey"
+                    android:textColorHint="@color/dark_grey"
+                    android:gravity="end"
+                    android:background="@null"
+                    android:paddingEnd="8dp"
+                    app:endIconMode="clear_text"
+                    android:inputType="number"/>
+                <TextView
+                    style="@style/textStyleSemIBold_14"
+                    android:id="@+id/tvRepetitionsPushUp"
+                    android:layout_weight="0.5"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Repetitions"
+                    android:textColor="@color/white" />
+
+                <EditText
+                    style="@style/textStyleSemIBold_14"
+                    android:id="@+id/etRepetitionsPushUp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_weight="1"
+                    android:hint="8"
+                    android:textColor="@color/dark_grey"
+                    android:textColorHint="@color/dark_grey"
+                    android:gravity="end"
+                    android:background="@null"
+                    android:paddingEnd="8dp"
+                    app:endIconMode="clear_text"
+                    android:inputType="number"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/custom_background_home_daily_plan">
+                <TextView
+                    style="@style/textStyleSemIBold_14"
+                    android:id="@+id/tvSitUp"
+                    android:layout_weight="0.5"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sit  up"
+                    android:textColor="@color/white" />
+
+                <ImageView
+                    style="@style/textStyleSemIBold_14"
+                    android:id="@+id/ivStatusSitUp"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_weight="0.1"
+                    android:src="@drawable/icon_done"
+                    android:gravity="end"
+                    android:layout_gravity="center_vertical"
+                    android:background="@null"
+                    android:paddingEnd="8dp"
+                    app:endIconMode="clear_text"
+                    android:inputType="text"
+                    app:tint="@color/green" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/dark_grey"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginStart="16dp">
+                <TextView
+                    style="@style/textStyleSemIBold_14"
+                    android:id="@+id/tvSetSitUp"
+                    android:layout_weight="0.5"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Set"
+                    android:textColor="@color/white" />
+                <EditText
+                    style="@style/textStyleSemIBold_14"
+                    android:id="@+id/etSetSitup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_weight="1"
+                    android:hint="3"
+                    android:textColor="@color/dark_grey"
+                    android:textColorHint="@color/dark_grey"
+                    android:gravity="end"
+                    android:background="@null"
+                    android:paddingEnd="8dp"
+                    app:endIconMode="clear_text"
+                    android:inputType="number"/>
+                <TextView
+                    style="@style/textStyleSemIBold_14"
+                    android:id="@+id/tvRepetitionsSitUp"
+                    android:layout_weight="0.5"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Repetitions"
+                    android:textColor="@color/white" />
+
+                <EditText
+                    style="@style/textStyleSemIBold_14"
+                    android:id="@+id/etRepetitionsSitup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_weight="1"
+                    android:hint="8"
+                    android:textColor="@color/dark_grey"
+                    android:textColorHint="@color/dark_grey"
+                    android:gravity="end"
+                    android:background="@null"
+                    android:paddingEnd="8dp"
+                    app:endIconMode="clear_text"
+                    android:inputType="number"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/custom_background_home_daily_plan">
+
+                <TextView
+                    style="@style/textStyleSemIBold_14"
+                    android:id="@+id/tvSquad"
+                    android:layout_weight="0.5"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Squad"
+                    android:textColor="@color/white" />
+
+                <ImageView
+                    style="@style/textStyleSemIBold_14"
+                    android:visibility="visible"
+                    android:id="@+id/ivStatusSquad"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_weight="0.1"
+                    android:src="@drawable/icon_close"
+                    android:gravity="end"
+                    android:layout_gravity="center_vertical"
+                    android:background="@null"
+                    android:paddingEnd="8dp"
+                    app:endIconMode="clear_text"
+                    android:inputType="text"
+                    app:tint="@color/red" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginStart="16dp"
+                android:visibility="gone">
+                <TextView
+                    style="@style/textStyleSemIBold_14"
+                    android:id="@+id/tvSetSquad"
+                    android:layout_weight="0.5"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Set"
+                    android:textColor="@color/white" />
+                <EditText
+                    style="@style/textStyleSemIBold_14"
+                    android:id="@+id/etSetSquad"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_weight="1"
+                    android:hint="3"
+                    android:textColor="@color/dark_grey"
+                    android:textColorHint="@color/dark_grey"
+                    android:gravity="end"
+                    android:background="@null"
+                    android:paddingEnd="8dp"
+                    app:endIconMode="clear_text"
+                    android:inputType="number"/>
+                <TextView
+                    style="@style/textStyleSemIBold_14"
+                    android:id="@+id/tvRepetitionsSquad"
+                    android:layout_weight="0.5"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Repetitions"
+                    android:textColor="@color/white" />
+
+                <EditText
+                    style="@style/textStyleSemIBold_14"
+                    android:id="@+id/etRepetitionsSquad"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_weight="1"
+                    android:hint="8"
+                    android:textColor="@color/dark_grey"
+                    android:textColorHint="@color/dark_grey"
+                    android:gravity="end"
+                    android:background="@null"
+                    android:paddingEnd="8dp"
+                    app:endIconMode="clear_text"
+                    android:inputType="number"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

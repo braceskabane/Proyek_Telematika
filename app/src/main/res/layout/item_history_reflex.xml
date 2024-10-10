@@ -1,6 +1,104 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/custom_background_history_category"
+    android:clipToPadding="false">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/custom_navbar_background"
+            android:backgroundTint="@color/reflex"
+            android:src="@drawable/icon_reflex"
+            android:padding="6dp">
+        </de.hdodenhof.circleimageview.CircleImageView>
+
+        <TextView
+            style="@style/textStyleSemIBold_16"
+            android:id="@+id/tvProgressWorkout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Reflex"
+            android:textColor="@color/white"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/textStyleSemIBold_20"
+                android:id="@+id/tvPointsAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.02 s"
+                android:textColor="@color/reflex"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginStart="4dp" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/dark_grey"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/icon_clock"
+            android:layout_gravity="center_vertical"/>
+
+        <TextView
+            android:id="@+id/tvTransferDate"
+            style="@style/textStyleMedium_14"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="16dp"
+            android:text="07:54, 28 Agustus 23"
+            android:textColor="@color/dark_grey"
+            android:textSize="12dp"
+            tools:ignore="TextSizeCheck" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+        <TextView
+            android:id="@+id/tvTransferAuthor"
+            style="@style/textStyleMedium_14"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="4dp"
+            android:text="Professional"
+            android:textColor="@color/dark_grey"
+            android:textSize="12dp"
+            tools:ignore="TextSizeCheck" />
+    </LinearLayout>
+</LinearLayout>

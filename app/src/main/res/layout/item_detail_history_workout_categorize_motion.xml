@@ -14,13 +14,23 @@
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/custom_navbar_background"
+            android:backgroundTint="@color/red_100"
+            android:src="@drawable/icon_push_up"
+            android:padding="4dp">
+        </de.hdodenhof.circleimageview.CircleImageView>
+
         <TextView
             style="@style/textStyleSemIBold_16"
             android:id="@+id/tvProgressWorkout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Complete"
+            android:text="Push Up "
             android:textColor="@color/white"
             android:textStyle="bold" />
 
@@ -34,8 +44,8 @@
                 android:id="@+id/tvPointsAmount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="100%"
-                android:textColor="@color/green"
+                android:text="14 m 0.2 s"
+                android:textColor="@color/red"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_marginStart="4dp" />
@@ -79,16 +89,16 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1" />
-            <TextView
-                android:id="@+id/tvTransferAuthor"
-                style="@style/textStyleMedium_14"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="4dp"
-                android:text="6 Exercise"
-                android:textColor="@color/dark_grey"
-                android:textSize="12dp"
-                tools:ignore="TextSizeCheck" />
-        </LinearLayout>
+        <TextView
+            android:id="@+id/tvTransferAuthor"
+            style="@style/textStyleMedium_14"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="4dp"
+            android:text="3*15 Repeticion"
+            android:textColor="@color/dark_grey"
+            android:textSize="12dp"
+            tools:ignore="TextSizeCheck" />
+    </LinearLayout>
 </LinearLayout>

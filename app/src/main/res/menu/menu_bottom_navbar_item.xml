@@ -7,7 +7,7 @@
         android:title="@string/home"/>
 
     <item
-        android:id="@+id/rangkingsFragment"
+        android:id="@+id/historyFragment"
         android:icon="@drawable/icon_history"
         android:title="@string/history" />
 
@@ -21,7 +21,7 @@
         android:title="" />
 
     <item
-        android:id="@+id/deviceFragment"
+        android:id="@+id/dailyplanFragment"
         android:icon="@drawable/icon_daily_plan"
         android:title="@string/plan" />
 

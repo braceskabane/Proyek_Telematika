@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@drawable/custom_background_home_daily_plan"
     android:layout_marginTop="10dp"
-    android:layout_marginBottom="10dp"
-    android:padding="16dp">
+    android:layout_marginBottom="10dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/containerSportCategorize"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/ivMotion"
+        <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="25dp"
             android:layout_height="25dp"
-            android:importantForAccessibility="no"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/custom_navbar_background"
+            android:backgroundTint="@color/red_100"
             android:src="@drawable/icon_push_up"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/dark_grey" />
+            android:padding="4dp"
+            tools:ignore="MissingConstraints">
+        </de.hdodenhof.circleimageview.CircleImageView>
         <TextView
             style="@style/textStyleMedium_14"
             android:id="@+id/tv_categorize_motion"

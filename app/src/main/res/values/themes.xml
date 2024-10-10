@@ -81,6 +81,13 @@
         <item name="android:includeFontPadding">false</item>
     </style>
 
+    <style name="textStyleSemIBold_12">
+        <item name="android:textColor">@color/white</item>
+        <item name="fontFamily">@font/plusjakartasanssemibold</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
     <!--    MEDIUM  -->
 
     <style name="textStyleMedium_20">

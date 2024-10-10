@@ -66,7 +66,7 @@ class HistoryFragment : Fragment() {
             button.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
         } else {
             button.setBackgroundResource(R.drawable.custom_button_history_reflex_no_border)
-            button.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+            button.setTextColor(ContextCompat.getColor(requireContext(), R.color.dark_grey))
         }
     }
 
