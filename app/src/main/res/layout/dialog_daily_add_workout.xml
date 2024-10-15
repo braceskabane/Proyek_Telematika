@@ -7,7 +7,7 @@
     android:padding="12dp">
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btn_add_tag_yes"
+        android:id="@+id/btn_add_tag_cancel"
         style="@style/textStyleSemIBold_14"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -19,7 +19,7 @@
         app:layout_constraintTop_toTopOf="parent"/>
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btn_add_tag_no"
+        android:id="@+id/btn_add_tag_save"
         style="@style/textStyleSemIBold_14"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -37,7 +37,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:gravity="center"
-        app:layout_constraintTop_toBottomOf="@+id/btn_add_tag_no"
+        app:layout_constraintTop_toBottomOf="@+id/btn_add_tag_save"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -49,8 +49,9 @@
             android:layout_gravity="center"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:background="@drawable/custom_background_home_daily_plan">\
+            android:background="@drawable/custom_background_home_daily_plan">
             <LinearLayout
+                android:id="@+id/llCustomWorkout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -98,6 +99,7 @@
                     android:inputType="text"/>
             </LinearLayout>
             <LinearLayout
+                android:id="@+id/llRepeat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -145,6 +147,7 @@
                     android:inputType="text"/>
             </LinearLayout>
             <LinearLayout
+                android:id="@+id/llLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">

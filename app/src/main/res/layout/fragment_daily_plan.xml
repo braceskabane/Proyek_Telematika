@@ -56,12 +56,13 @@
 
             <Button
                 style="@style/textStyleSemIBold_14"
+                android:id="@+id/previousWeekButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="<-"
+                android:text="&lt;-"
                 android:textColor="@color/red_100"
-                android:background=""
+                android:background="@android:color/transparent"
                 android:textStyle="bold"
                 android:onClick="previousWeekAction"
                 android:textSize="20sp"/>
@@ -79,12 +80,13 @@
 
             <Button
                 style="@style/textStyleSemIBold_14"
+                android:id="@+id/nextWeekButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="->"
                 android:textColor="@color/red_100"
-                android:background=""
+                android:background="@android:color/transparent"
                 android:textStyle="bold"
                 android:onClick="nextWeekAction"
                 android:textSize="20sp"/>
@@ -164,12 +166,13 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvCalendar"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:minHeight="50dp"
             tools:listitem="@layout/item_weeklyplan_calendar"/>
 
         <Button
             style="@style/textStyleSemIBold_14"
+            android:id="@+id/btn_AddWorkout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"

@@ -1,60 +1,90 @@
 package com.dicoding.hanebado.view.dashboard.plan
 
+import AddWorkoutDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.dicoding.hanebado.R
+import java.util.Calendar
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+class DailyPlanFragment : Fragment(), CalendarAdapter.OnItemListener {
 
-/**
- * A simple [Fragment] subclass.
- * Use the [DailyPlanFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class DailyPlanFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private lateinit var monthYearText: TextView
+    private lateinit var calendarRecyclerView: RecyclerView
+    private lateinit var eventListRecyclerView: RecyclerView
+    private lateinit var calendarAdapter: CalendarAdapter
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        Log.d("DailyPlanFragment", "onCreateView called")
         return inflater.inflate(R.layout.fragment_daily_plan, container, false)
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment DeviceFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            DailyPlanFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        Log.d("DailyPlanFragment", "onViewCreated called")
+        initWidgets(view)
+        CalendarUtils.selectedDate = Calendar.getInstance()
+        setupRecyclerView()
+
+        view.findViewById<Button>(R.id.previousWeekButton).setOnClickListener { previousWeekAction() }
+        view.findViewById<Button>(R.id.nextWeekButton).setOnClickListener { nextWeekAction() }
+        view.findViewById<Button>(R.id.btn_AddWorkout).setOnClickListener { showAddWorkoutDialog() }
+    }
+
+    private fun showAddWorkoutDialog() {
+        val dialog = AddWorkoutDialog()
+        dialog.show(childFragmentManager, "AddWorkoutDialog")
+    }
+
+    private fun initWidgets(view: View) {
+        calendarRecyclerView = view.findViewById(R.id.rvCalendar)
+        monthYearText = view.findViewById(R.id.monthYearTV)
+        eventListRecyclerView = view.findViewById(R.id.rvEventListView)
+    }
+
+    private fun setupRecyclerView() {
+        Log.d("DailyPlanFragment", "setupRecyclerView called")
+        calendarRecyclerView.layoutManager = GridLayoutManager(requireContext(), 7)
+        calendarAdapter = CalendarAdapter(ArrayList(), this)
+        calendarRecyclerView.adapter = calendarAdapter
+        setWeekView()
+    }
+
+    private fun setWeekView() {
+        Log.d("DailyPlanFragment", "setWeekView called")
+        monthYearText.text = CalendarUtils.monthYearFromDate(CalendarUtils.selectedDate)
+        val days = CalendarUtils.daysInWeekArray(CalendarUtils.selectedDate)
+        Log.d("DailyPlanFragment", "Days: ${days.joinToString { it?.time.toString() }}")
+        calendarAdapter.updateData(days)
+    }
+
+    private fun previousWeekAction() {
+        CalendarUtils.selectedDate.add(Calendar.WEEK_OF_YEAR, -1)
+        setWeekView()
+    }
+
+    private fun nextWeekAction() {
+        CalendarUtils.selectedDate.add(Calendar.WEEK_OF_YEAR, 1)
+        setWeekView()
+    }
+
+    override fun onItemClick(position: Int, date: Calendar?) {
+        date?.let {
+            CalendarUtils.selectedDate = it
+            setWeekView()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("DailyPlanFragment", "onResume called")
+        setWeekView()
     }
 }
