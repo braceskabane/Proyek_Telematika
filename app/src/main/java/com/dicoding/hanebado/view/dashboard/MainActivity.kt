@@ -1,11 +1,13 @@
 package com.dicoding.hanebado.view.dashboard
 
 import android.Manifest
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -14,10 +16,12 @@ import com.dicoding.hanebado.R
 import com.dicoding.hanebado.core.utils.showLongToast
 import com.dicoding.hanebado.core.utils.showToast
 import com.dicoding.hanebado.databinding.ActivityMainBinding
+import com.dicoding.hanebado.view.dashboard.record.RecordActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.play.core.splitinstall.SplitInstallManager
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallRequest
+import com.google.common.util.concurrent.ListenableFuture
 
 
 class MainActivity : AppCompatActivity(){
@@ -25,6 +29,8 @@ class MainActivity : AppCompatActivity(){
     private lateinit var binding: ActivityMainBinding
 
     private lateinit var splitInstallManager: SplitInstallManager
+
+    private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +47,15 @@ class MainActivity : AppCompatActivity(){
         setupBottomNavbar()
 
         checkNotificationPermission()
+
+        binding.fbRecord.setOnClickListener {
+            startRecordActivity()
+        }
+    }
+
+    private fun startRecordActivity() {
+        val intent = Intent(this, RecordActivity::class.java)
+        startActivity(intent)
     }
 
 
@@ -117,6 +132,10 @@ class MainActivity : AppCompatActivity(){
                 showLongToast("Izin tidak diberikan, ini akan mempengaruhi jalannya aplikasi")
             }
         }
+
+    companion object {
+        private const val TAG = "MainActivity"
+    }
 }
 
 //class MainActivity : AppCompatActivity(), SensorEventListener {

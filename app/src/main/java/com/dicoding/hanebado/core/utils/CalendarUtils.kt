@@ -1,4 +1,4 @@
-package com.dicoding.hanebado.view.dashboard.plan
+package com.dicoding.hanebado.core.utils
 
 import android.util.Log
 import java.text.SimpleDateFormat

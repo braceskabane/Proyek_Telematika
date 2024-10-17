@@ -12,6 +12,8 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dicoding.hanebado.R
+import com.dicoding.hanebado.core.adapter.CalendarAdapter
+import com.dicoding.hanebado.core.utils.CalendarUtils
 import java.util.Calendar
 
 class DailyPlanFragment : Fragment(), CalendarAdapter.OnItemListener {

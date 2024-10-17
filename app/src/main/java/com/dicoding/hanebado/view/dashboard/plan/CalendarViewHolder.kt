@@ -4,6 +4,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.dicoding.hanebado.R
+import com.dicoding.hanebado.core.adapter.CalendarAdapter
 import java.util.Calendar
 
 @Suppress("DEPRECATION")

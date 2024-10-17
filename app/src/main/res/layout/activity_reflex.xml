@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/custom_background_home_daily_plan">
+
+
+<!--  Start  -->
+    <LinearLayout
+        android:id="@+id/startReflex"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:id="@+id/icon_reflex"
+            android:background="@drawable/custom_navbar_background"
+            android:backgroundTint="@color/reflex"
+            android:padding="12dp"
+            android:src="@drawable/icon_ear" />
+
+        <TextView
+            style="@style/textStyleSemIBold_20"
+            android:id="@+id/tv_beCareFull"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Click The Screen If You Hear The Bell"
+            android:textColor="@color/dark_grey"
+            android:layout_marginTop="32dp"/>
+    </LinearLayout>
+
+    <TextView
+        style="@style/textStyleSemIBold_16"
+        android:id="@+id/tv_pb_reflex"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="80%"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/pb_reflex"
+        android:textColor="@color/dark_grey"
+        android:layout_marginBottom="32dp"/>
+
+    <ProgressBar
+        android:id="@+id/pb_reflex"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="false"
+        android:max="100"
+        android:progress="80"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:progressDrawable="@drawable/custom_background_reflex_loading"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
