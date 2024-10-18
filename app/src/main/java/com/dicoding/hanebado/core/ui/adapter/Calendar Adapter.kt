@@ -1,4 +1,4 @@
-package com.dicoding.hanebado.core.adapter
+package com.dicoding.hanebado.core.ui.adapter
 
 import android.util.Log
 import android.view.LayoutInflater

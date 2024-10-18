@@ -21,6 +21,7 @@ import kotlin.random.Random
 
 class ReflexActivity : AppCompatActivity() {
     private lateinit var mediaPlayer: MediaPlayer
+    private val AUDIO_DELAY = 1600L
     private var startTime: Long = 0
     private var endTime: Long = 0
     private var isSoundPlayed = false
@@ -33,6 +34,7 @@ class ReflexActivity : AppCompatActivity() {
     private val TOTAL_ROUNDS = 5
     private val bellSoundDuration = 3000L
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -41,10 +43,17 @@ class ReflexActivity : AppCompatActivity() {
         progressBar = findViewById(R.id.pb_reflex)
         tvProgress = findViewById(R.id.tv_pb_reflex)
 
-        mediaPlayer = MediaPlayer.create(this, R.raw.ring_bell)
+        initializeMediaPlayer()
 
         updateProgress(0)
         showPrepareDialog()
+    }
+
+    private fun initializeMediaPlayer() {
+        mediaPlayer = MediaPlayer.create(this, R.raw.ring_bell)
+        mediaPlayer.setOnCompletionListener {
+            isSoundPlayed = false
+        }
     }
 
     private fun updateProgress(currentRound: Int) {
@@ -117,10 +126,11 @@ class ReflexActivity : AppCompatActivity() {
     }
 
     private fun playSound() {
-        Log.d("ReflexActivity", "Playing bell sound")
+        mediaPlayer.seekTo(0)
         mediaPlayer.start()
-        startTime = System.currentTimeMillis()
+        startTime = System.nanoTime()
         isSoundPlayed = true
+        Log.d("ReflexActivity", "Bell sound started, timing begins")
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -132,9 +142,10 @@ class ReflexActivity : AppCompatActivity() {
                 Log.d("ReflexActivity", "Touched too early")
                 showTooFastDialog()
             } else {
-                endTime = System.currentTimeMillis()
-                val reactionTime = endTime - startTime
-                Log.d("ReflexActivity", "Reaction time: $reactionTime ms")
+                val endTime = System.nanoTime()
+                var reactionTime = (endTime - startTime) / 1_000_000 // Convert to milliseconds
+                reactionTime = maxOf(0, reactionTime - AUDIO_DELAY) // Compensate for audio delay
+                Log.d("ReflexActivity", "Reaction time (compensated): $reactionTime ms")
                 reactionTimes.add(reactionTime)
 
                 repeatCount++

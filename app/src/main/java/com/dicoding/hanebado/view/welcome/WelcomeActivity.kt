@@ -26,12 +26,12 @@ class WelcomeActivity : AppCompatActivity() {
     private fun sliderpage(){
         val titles = listOf("Page 1", "Page 2", "Page 3")
         val descriptions = listOf(
-            "Track your badminton life in one place.",
+            "Track your workout life in one place.",
             "Make progress toward goals.",
             "Show your true strength to the enemies"
         )
-        val images = listOf(R.drawable.test_image_a, R.drawable.test_image_a, R.drawable.test_image_a)
-        val phones = listOf(R.drawable.test_phone_a, R.drawable.test_phone_a, R.drawable.test_phone_a)
+        val images = listOf(R.drawable.img1, R.drawable.img2, R.drawable.img3)
+        val phones = listOf(R.drawable.phone1, R.drawable.phone1, R.drawable.phone1)
 
         val viewPager = findViewById<ViewPager2>(R.id.view_pager2)
 

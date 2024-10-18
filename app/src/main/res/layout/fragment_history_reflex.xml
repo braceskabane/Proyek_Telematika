@@ -5,6 +5,14 @@
     android:layout_height="match_parent"
     tools:context=".view.dashboard.history.reflex.HistoryReflexFragment">
 
+    <TextView
+        style="@style/textStyleSemIBold_32"
+        android:layout_gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        android:text="TESTING HISTORY REFLEX"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvReflexItem"
         android:layout_width="match_parent"
