@@ -23,5 +23,4 @@ interface ApiService {
         @Field("password") password: String
     ): RegisterResponse
 
-
 }

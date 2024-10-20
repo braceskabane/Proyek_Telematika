@@ -9,16 +9,23 @@ import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.util.Patterns
 import android.view.View
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.dicoding.hanebado.R
 import com.dicoding.hanebado.core.data.source.Resource
+import com.dicoding.hanebado.core.domain.auth.model.LoginDomain
 import com.dicoding.hanebado.core.utils.isInternetAvailable
 import com.dicoding.hanebado.core.utils.showToast
 import com.dicoding.hanebado.databinding.ActivityLoginBinding
 import com.dicoding.hanebado.view.dashboard.MainActivity
 import com.dicoding.hanebado.view.register.RegisterActivity
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
@@ -32,27 +39,22 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupAction()
-
-        setupActionBar()
-
+        isButtonEnabled(true)
         handleEditText()
-
-        handleButtonLogin()
+        observeLoginResult()
     }
 
-    private fun setupAction() {
-        binding.btnLogin.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
-        }
+    private fun showErrorBottomSheet(errorMessage: String) {
+        val bottomSheetDialog = BottomSheetDialog(this, R.style.TransparentBottomSheetDialogTheme)
+        val view = layoutInflater.inflate(R.layout.dialog_error_login_register, null)
+        bottomSheetDialog.setContentView(view)
 
-        binding.tvRegister.setOnClickListener {
-            startActivity(Intent(this, RegisterActivity::class.java))
-        }
-    }
+        val tvErrorMessage = view.findViewById<TextView>(R.id.puError)
+        tvErrorMessage.text = errorMessage
 
-    private fun setupActionBar() {
-        supportActionBar?.hide()
+        Log.d("LoginActivity", "Showing error bottom sheet with message: $errorMessage")
+
+        bottomSheetDialog.show()
     }
 
     private fun handleEditText() {
@@ -126,65 +128,75 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun isButtonEnabled(isEnabled: Boolean) {
+        Log.d("LoginActivity", "isButtonEnabled called with: $isEnabled")
         binding.btnLogin.isEnabled = isEnabled
+        // Tidak perlu set background color di sini karena sudah diatur oleh selector drawable
     }
 
     private fun showLoading(isLoading: Boolean) {
         binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
     }
 
-    private fun handleButtonLogin() {
+    private fun observeLoginResult() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                loginViewModel.loginResult.collect { result ->
+                    when (result) {
+                        is Resource.Loading -> {
+
+                        }
+                        is Resource.Success -> {
+                            showLoading(false)
+                            isButtonEnabled(true)
+                            handleSuccessfulLogin(result.data)
+                        }
+                        is Resource.Error -> {
+                            showLoading(false)
+                            isButtonEnabled(true)
+                            handleLoginError(result.message)
+                        }
+                        else -> {}
+                    }
+                }
+            }
+        }
+
+        binding.btnLogin.setOnClickListener {
+            startLogin()
+        }
+
         binding.tvRegister.setOnClickListener {
             navigateToRegisterActivity()
         }
-        binding.btnLogin.setOnClickListener {
-            val email = binding.edLoginEmail.text.toString()
-            val password = binding.edLoginPass.text.toString()
+    }
 
-            loginViewModel.login(email, password).observe(this) { result ->
-                when (result) {
-                    is Resource.Error -> {
-                        showLoading(false)
-                        isButtonEnabled(true)
+    private fun startLogin() {
+        val email = binding.edLoginEmail.text.toString()
+        val password = binding.edLoginPass.text.toString()
+        showLoading(true)
+        isButtonEnabled(false)
+        loginViewModel.login(email, password)
+    }
 
-                        if (!isInternetAvailable(this)) {
-                            showToast(getString(R.string.check_internet))
-                        } else {
-                            showToast(getString(R.string.check_data))
-                        }
-                    }
+    private fun handleLoginError(errorMessage: String?) {
+        Log.d("LoginActivity", "Error message received: $errorMessage")
+        if (!isInternetAvailable(this)) {
+            showErrorBottomSheet(getString(R.string.check_internet))
+        } else {
+            showErrorBottomSheet(errorMessage ?: getString(R.string.check_data))
+        }
+    }
 
-                    is Resource.Loading -> {
-                        showLoading(true)
-                        isButtonEnabled(false)
-                    }
-
-                    is Resource.Message -> {
-                        showLoading(false)
-                        isButtonEnabled(true)
-
-                        Log.d("LoginActivity", result.message.toString())
-                    }
-
-                    is Resource.Success -> {
-                        showLoading(false)
-                        isButtonEnabled(true)
-
-                        val token = result.data?.accessToken
-                        if (token != null) {
-                            loginViewModel.saveLoginStatus(true).observe(this) { isLoginSaved ->
-                                if (isLoginSaved) {
-                                    navigateToMainActivity()
-                                }
-                            }
-                        } else {
-                            showToast(getString(R.string.login_failed_no_token))
-                        }
-                    }
-
-                    else -> {}
-                }
-            }
+    private fun handleSuccessfulLogin(loginData: LoginDomain?) {
+        val token = loginData?.accessToken
+        if (token != null) {
+            loginViewModel.saveLoginStatus(true)
+            loginViewModel.saveAccessToken(token)
+            showLoading(false)
+            navigateToMainActivity()
+        } else {
+            showLoading(false)
+            showToast(getString(R.string.login_failed_no_token))
         }
     }
 

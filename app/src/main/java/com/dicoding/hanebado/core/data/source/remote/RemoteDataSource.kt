@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import retrofit2.HttpException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,9 +22,12 @@ class RemoteDataSource @Inject constructor(private val apiService: ApiService) {
                 Log.d("RemoteDataSource", "Login request: email=$email, password=$password")
                 val response = apiService.login(email, password)
                 emit(ApiResponse.Success(response))
+            } catch (e: HttpException) {
+                Log.e("RemoteDataSource", "Login HTTP error: ${e.code()}, ${e.message()}")
+                emit(ApiResponse.Error(e))
             } catch (e: Exception) {
-                emit(ApiResponse.Error(e.toString()))
-                Log.e("RemoteDataSource", "Login error: ${e.toString()}")
+                Log.e("RemoteDataSource", "Login error: ${e.javaClass.simpleName}, ${e.message}")
+                emit(ApiResponse.Error(e))
             }
         }.flowOn(Dispatchers.IO)
     }
@@ -35,7 +39,7 @@ class RemoteDataSource @Inject constructor(private val apiService: ApiService) {
                 val response = apiService.register(name, email, password)
                 emit(ApiResponse.Success(response))
             } catch (e: Exception) {
-                emit(ApiResponse.Error(e.toString()))
+                emit(ApiResponse.Error(e))
                 Log.e("RemoteDataSource", "Register error: ${e.toString()}")
             }
         }.flowOn(Dispatchers.IO)

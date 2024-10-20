@@ -14,10 +14,15 @@ abstract class NetworkBoundResource<ResultType, RequestType> {
             }
             is ApiResponse.Error -> {
                 onFetchFailed()
-                emit(Resource.Error(apiResponse.errorMessage))
+                emit(Resource.Error(apiResponse.exception.toString()))
             }
             is ApiResponse.Empty -> {
                 emit(Resource.Message("Empty"))
+            }
+            is ApiResponse.Loading -> {
+                // Karena kita sudah mengemit Resource.Loading() di awal,
+                // kita bisa mengabaikan ApiResponse.Loading atau mengemit ulang jika diperlukan
+                // emit(Resource.Loading())
             }
         }
     }
