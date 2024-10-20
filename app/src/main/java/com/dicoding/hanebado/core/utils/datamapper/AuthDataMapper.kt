@@ -1,9 +1,13 @@
 package com.dicoding.hanebado.core.utils.datamapper
 
 import com.dicoding.hanebado.core.data.source.remote.response.LoginResponse
+import com.dicoding.hanebado.core.data.source.remote.response.OtpResponse
 import com.dicoding.hanebado.core.data.source.remote.response.RegisterResponse
+import com.dicoding.hanebado.core.data.source.remote.response.ResendOtpResponse
 import com.dicoding.hanebado.core.domain.auth.model.LoginDomain
+import com.dicoding.hanebado.core.domain.auth.model.OtpDomain
 import com.dicoding.hanebado.core.domain.auth.model.RegisterDomain
+import com.dicoding.hanebado.core.domain.auth.model.ResendOtpDomain
 import com.dicoding.hanebado.core.domain.auth.model.UserDomain
 
 object AuthDataMapper {
@@ -30,4 +34,11 @@ object AuthDataMapper {
             message = response.message ?: ""
         )
     }
+    fun mapOtpResponseToDomain(response: OtpResponse): OtpDomain {
+        return OtpDomain(
+            message = response.message ?: ""
+        )
+    }
+    fun ResendOtpResponse.toDomain() = ResendOtpDomain(message)
+
 }

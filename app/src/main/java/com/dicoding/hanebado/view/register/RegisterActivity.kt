@@ -17,6 +17,7 @@ import com.dicoding.hanebado.core.utils.isInternetAvailable
 import com.dicoding.hanebado.core.utils.showToast
 import com.dicoding.hanebado.databinding.ActivityRegisterBinding
 import com.dicoding.hanebado.view.login.LoginActivity
+import com.dicoding.hanebado.view.otp.OtpActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -162,6 +163,7 @@ class RegisterActivity : AppCompatActivity() {
                         } else {
                             showToast("Pastikan email dan password telah benar")
                         }
+
                     }
 
                     is Resource.Loading -> {
@@ -181,8 +183,13 @@ class RegisterActivity : AppCompatActivity() {
                         isButtonEnabled(true)
                         showToast(getString(R.string.register_success))
 
-                        // Navigate to LoginActivity
-                        navigateToLoginActivity()
+                        val userId = result.data?.user?.id
+                        if (userId != null) {
+                            navigateToOtpActivity(userId)
+                        } else {
+                            showToast("Error: User ID not found")
+                            Log.e("RegisterActivity", "User ID is null after successful registration")
+                        }
                     }
 
                     else -> {}
@@ -198,6 +205,14 @@ class RegisterActivity : AppCompatActivity() {
     private fun navigateToLoginActivity() {
         val intent = Intent(this, LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+    }
+
+    private fun navigateToOtpActivity(userId: String) {
+        val intent = Intent(this, OtpActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra("USER_ID", userId)
+        }
         startActivity(intent)
     }
 }

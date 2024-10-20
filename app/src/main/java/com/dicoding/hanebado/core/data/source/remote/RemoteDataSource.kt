@@ -4,7 +4,9 @@ import android.util.Log
 import com.dicoding.hanebado.core.data.source.remote.network.ApiResponse
 import com.dicoding.hanebado.core.data.source.remote.network.ApiService
 import com.dicoding.hanebado.core.data.source.remote.response.LoginResponse
+import com.dicoding.hanebado.core.data.source.remote.response.OtpResponse
 import com.dicoding.hanebado.core.data.source.remote.response.RegisterResponse
+import com.dicoding.hanebado.core.data.source.remote.response.ResendOtpResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -44,4 +46,22 @@ class RemoteDataSource @Inject constructor(private val apiService: ApiService) {
             }
         }.flowOn(Dispatchers.IO)
     }
+
+    suspend fun activateOtp(userId: String, otpCode: String): Flow<ApiResponse<OtpResponse>> = flow {
+        try {
+            val response = apiService.otp(userId, otpCode)
+            emit(ApiResponse.Success(response))
+        } catch (e: Exception) {
+            emit(ApiResponse.Error(e))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    suspend fun resendOTP(userId: String): Flow<ApiResponse<ResendOtpResponse>> = flow {
+        try {
+            val response = apiService.resendOTP(userId)
+            emit(ApiResponse.Success(response))
+        } catch (e: Exception) {
+            emit(ApiResponse.Error(e))
+        }
+    }.flowOn(Dispatchers.IO)
 }

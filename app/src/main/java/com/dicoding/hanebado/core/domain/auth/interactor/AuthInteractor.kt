@@ -3,7 +3,9 @@ package com.dicoding.hanebado.core.domain.auth.interactor
 import com.dicoding.hanebado.core.data.repository.AuthRepository
 import com.dicoding.hanebado.core.data.source.Resource
 import com.dicoding.hanebado.core.domain.auth.model.LoginDomain
+import com.dicoding.hanebado.core.domain.auth.model.OtpDomain
 import com.dicoding.hanebado.core.domain.auth.model.RegisterDomain
+import com.dicoding.hanebado.core.domain.auth.model.ResendOtpDomain
 import com.dicoding.hanebado.core.domain.auth.usecase.AuthUseCase
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -35,5 +37,13 @@ class AuthInteractor @Inject constructor(private val authRepository: AuthReposit
 
     override fun getLoginStatus(): Flow<Boolean> {
         return authRepository.getLoginStatus()
+    }
+
+    override fun activateOtp(userId: String, otpCode: String): Flow<Resource<OtpDomain>> {
+        return authRepository.activateOtp(userId, otpCode)
+    }
+
+    override fun resendOTP(userId: String): Flow<Resource<ResendOtpDomain>> {
+        return authRepository.resendOTP(userId)
     }
 }

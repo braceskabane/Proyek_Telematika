@@ -31,10 +31,10 @@
                 android:layout_gravity="center">
 
                 <TextView
-                    style="@style/textStyleSemIBold_32"
                     android:id="@+id/tvHistory"
+                    style="@style/textStyleSemIBold_32"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:text="Profile"
                     android:textColor="@android:color/white" />
             </LinearLayout>

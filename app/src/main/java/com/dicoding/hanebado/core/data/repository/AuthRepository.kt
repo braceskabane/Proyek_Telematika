@@ -6,11 +6,16 @@ import com.dicoding.hanebado.core.data.source.local.datastore.DataStoreManager
 import com.dicoding.hanebado.core.data.source.remote.RemoteDataSource
 import com.dicoding.hanebado.core.data.source.remote.network.ApiResponse
 import com.dicoding.hanebado.core.data.source.remote.response.LoginResponse
+import com.dicoding.hanebado.core.data.source.remote.response.OtpResponse
 import com.dicoding.hanebado.core.data.source.remote.response.RegisterResponse
+import com.dicoding.hanebado.core.data.source.remote.response.ResendOtpResponse
 import com.dicoding.hanebado.core.domain.auth.model.LoginDomain
+import com.dicoding.hanebado.core.domain.auth.model.OtpDomain
 import com.dicoding.hanebado.core.domain.auth.model.RegisterDomain
+import com.dicoding.hanebado.core.domain.auth.model.ResendOtpDomain
 import com.dicoding.hanebado.core.domain.auth.repository.IAuthRepository
 import com.dicoding.hanebado.core.utils.datamapper.AuthDataMapper
+import com.dicoding.hanebado.core.utils.datamapper.AuthDataMapper.toDomain
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
@@ -64,5 +69,37 @@ class AuthRepository @Inject constructor(
 
     override fun getLoginStatus(): Flow<Boolean> {
         return dataStoreManager.getLoginStatus().flowOn(Dispatchers.IO)
+    }
+
+    override fun activateOtp(userId: String, otpCode: String): Flow<Resource<OtpDomain>> {
+        return object : NetworkBoundResource<OtpDomain, OtpResponse>() {
+            override suspend fun fetchFromApi(response: OtpResponse): OtpDomain {
+                return AuthDataMapper.mapOtpResponseToDomain(response)
+            }
+
+            override suspend fun createCall(): Flow<ApiResponse<OtpResponse>> {
+                return remoteDataSource.activateOtp(userId, otpCode)
+            }
+
+            override fun onFetchFailed() {
+                // Handle fetch failure if needed
+            }
+        }.asFlow()
+    }
+
+    override fun resendOTP(userId: String): Flow<Resource<ResendOtpDomain>> {
+        return object : NetworkBoundResource<ResendOtpDomain, ResendOtpResponse>() {
+            override suspend fun fetchFromApi(response: ResendOtpResponse): ResendOtpDomain {
+                return response.toDomain()
+            }
+
+            override suspend fun createCall(): Flow<ApiResponse<ResendOtpResponse>> {
+                return remoteDataSource.resendOTP(userId)
+            }
+
+            override fun onFetchFailed() {
+                // Handle fetch failure if needed
+            }
+        }.asFlow()
     }
 }
