@@ -12,19 +12,24 @@ import javax.inject.Inject
 
 class AuthAuthenticator @Inject constructor(
     private val datastoreManager: DataStoreManager,
-) :
-    Authenticator {
+) : Authenticator {
     override fun authenticate(route: Route?, response: Response): Request? {
+        // Bypass authenticator untuk endpoint aktivasi
+        if (response.request.url.toString().contains("/users/") &&
+            response.request.method == "GET") {
+            Log.d("AuthAuthenticator", "Bypassing authenticator for activation check endpoint")
+            return null
+        }
+
         val accessToken = runBlocking {
             datastoreManager.getAccessToken().first().toString()
         }
 
         return if (response.code == 401 && accessToken.isNotEmpty()) {
             runBlocking {
+                Log.e("AuthAuthenticator", "Token expired. Logging out user.")
                 datastoreManager.deleteToken()
                 datastoreManager.saveLoginStatus(false).first()
-
-                Log.e("AuthAuthenticator", "Token expired. User logged out.")
                 null
             }
         } else {

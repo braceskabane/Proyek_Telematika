@@ -1,14 +1,17 @@
 package com.dicoding.hanebado.core.data.repository
 
+import android.util.Log
 import com.dicoding.hanebado.core.data.source.NetworkBoundResource
 import com.dicoding.hanebado.core.data.source.Resource
 import com.dicoding.hanebado.core.data.source.local.datastore.DataStoreManager
 import com.dicoding.hanebado.core.data.source.remote.RemoteDataSource
 import com.dicoding.hanebado.core.data.source.remote.network.ApiResponse
+import com.dicoding.hanebado.core.data.source.remote.response.ActiveResponse
 import com.dicoding.hanebado.core.data.source.remote.response.LoginResponse
 import com.dicoding.hanebado.core.data.source.remote.response.OtpResponse
 import com.dicoding.hanebado.core.data.source.remote.response.RegisterResponse
 import com.dicoding.hanebado.core.data.source.remote.response.ResendOtpResponse
+import com.dicoding.hanebado.core.domain.auth.model.ActiveCheckDomain
 import com.dicoding.hanebado.core.domain.auth.model.LoginDomain
 import com.dicoding.hanebado.core.domain.auth.model.OtpDomain
 import com.dicoding.hanebado.core.domain.auth.model.RegisterDomain
@@ -19,6 +22,8 @@ import com.dicoding.hanebado.core.utils.datamapper.AuthDataMapper.toDomain
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -101,5 +106,30 @@ class AuthRepository @Inject constructor(
                 // Handle fetch failure if needed
             }
         }.asFlow()
+    }
+
+    // Di AuthRepository
+    override fun activateCheck(email: String): Flow<Resource<ActiveCheckDomain>> {
+        return object : NetworkBoundResource<ActiveCheckDomain, ActiveResponse>() {
+            override suspend fun fetchFromApi(response: ActiveResponse): ActiveCheckDomain {
+                Log.d("AuthRepository", "Converting response to domain: $response")
+                return response.toDomain()
+            }
+
+            override suspend fun createCall(): Flow<ApiResponse<ActiveResponse>> {
+                Log.d("AuthRepository", "Creating API call")
+                return remoteDataSource.activateCheck(email)
+            }
+
+            override fun onFetchFailed() {
+                Log.e("AuthRepository", "Fetch failed for activation check")
+            }
+        }.asFlow()
+            .onStart {
+                Log.d("AuthRepository", "Starting network bound resource flow")
+            }
+            .onCompletion {
+                Log.d("AuthRepository", "Completing network bound resource flow")
+            }
     }
 }

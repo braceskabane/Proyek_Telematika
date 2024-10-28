@@ -1,5 +1,6 @@
 package com.dicoding.hanebado.core.data.source.remote.network
 
+import com.dicoding.hanebado.core.data.source.remote.response.ActiveResponse
 import com.dicoding.hanebado.core.data.source.remote.response.LoginResponse
 import com.dicoding.hanebado.core.data.source.remote.response.OtpResponse
 import com.dicoding.hanebado.core.data.source.remote.response.RegisterResponse
@@ -47,7 +48,11 @@ interface ApiService {
         @Path("userId") userId: String
     ): ResendOtpResponse
 
+    @GET("users/{email}")
+    suspend fun activateCheck(
+        @Path("email") email: String
+    ): ActiveResponse
 
-
+    ///////////////////////////////////////////////////////////////////////////////
 
 }

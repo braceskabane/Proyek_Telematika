@@ -2,6 +2,7 @@ package com.dicoding.hanebado.core.domain.auth.interactor
 
 import com.dicoding.hanebado.core.data.repository.AuthRepository
 import com.dicoding.hanebado.core.data.source.Resource
+import com.dicoding.hanebado.core.domain.auth.model.ActiveCheckDomain
 import com.dicoding.hanebado.core.domain.auth.model.LoginDomain
 import com.dicoding.hanebado.core.domain.auth.model.OtpDomain
 import com.dicoding.hanebado.core.domain.auth.model.RegisterDomain
@@ -46,4 +47,9 @@ class AuthInteractor @Inject constructor(private val authRepository: AuthReposit
     override fun resendOTP(userId: String): Flow<Resource<ResendOtpDomain>> {
         return authRepository.resendOTP(userId)
     }
+
+    override fun activateCheck(email: String): Flow<Resource<ActiveCheckDomain>> {
+        return authRepository.activateCheck(email)
+    }
+
 }

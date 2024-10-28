@@ -1,6 +1,7 @@
 package com.dicoding.hanebado.core.domain.auth.repository
 
 import com.dicoding.hanebado.core.data.source.Resource
+import com.dicoding.hanebado.core.domain.auth.model.ActiveCheckDomain
 import com.dicoding.hanebado.core.domain.auth.model.LoginDomain
 import com.dicoding.hanebado.core.domain.auth.model.OtpDomain
 import com.dicoding.hanebado.core.domain.auth.model.RegisterDomain
@@ -21,4 +22,5 @@ interface IAuthRepository {
     // Otp
     fun activateOtp(userId: String, otpCode: String): Flow<Resource<OtpDomain>>
     fun resendOTP(userId: String): Flow<Resource<ResendOtpDomain>>
+    fun activateCheck(email: String): Flow<Resource<ActiveCheckDomain>>
 }

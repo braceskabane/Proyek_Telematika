@@ -12,17 +12,28 @@ class AuthInterceptor @Inject constructor(private val datastoreManager: DataStor
     Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
+        val originalRequest = chain.request()
+        val requestUrl = originalRequest.url.toString()
+
+        // Bypass auth untuk endpoint aktivasi
+        if (requestUrl.contains("/users/") && originalRequest.method == "GET") {
+            Log.d("AuthInterceptor", "Bypassing auth for activation check endpoint")
+            return chain.proceed(originalRequest)
+        }
+
         val token = runBlocking {
             datastoreManager.getAccessToken().first().toString()
         }
 
         Log.d("AuthInterceptor", "Access token: $token")
 
-        val request = chain.request().newBuilder()
-        if (token.isNotEmpty()) {
-            request.addHeader("Authorization", "Bearer $token")
+        return if (token.isNotEmpty()) {
+            val authorizedRequest = originalRequest.newBuilder()
+                .addHeader("Authorization", "Bearer $token")
+                .build()
+            chain.proceed(authorizedRequest)
+        } else {
+            chain.proceed(originalRequest)
         }
-
-        return chain.proceed(request.build())
     }
 }

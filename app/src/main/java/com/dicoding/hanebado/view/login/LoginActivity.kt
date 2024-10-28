@@ -22,6 +22,7 @@ import com.dicoding.hanebado.core.utils.isInternetAvailable
 import com.dicoding.hanebado.core.utils.showToast
 import com.dicoding.hanebado.databinding.ActivityLoginBinding
 import com.dicoding.hanebado.view.dashboard.MainActivity
+import com.dicoding.hanebado.view.otp.OtpActivity
 import com.dicoding.hanebado.view.register.RegisterActivity
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import dagger.hilt.android.AndroidEntryPoint
@@ -39,9 +40,43 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        isButtonEnabled(true)
+        isButtonEnabled(false)
         handleEditText()
         observeLoginResult()
+        observeActivationState()
+    }
+
+    private fun observeActivationState() {
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                loginViewModel.activationState.collect { result ->
+                    when (result) {
+                        is Resource.Loading -> {
+                        }
+                        is Resource.Success -> {
+                            showLoading(false)
+                            result.data?.let { data ->
+                                Log.d("LoginActivity", "Received activation data: id=${data.id}, isActivated=${data.isActivated}")
+                                if (!data.isActivated) {
+                                    navigateToOtpActivity(data.id, data.email)
+                                } else {
+                                    proceedWithLogin()
+                                }
+                            }
+                        }
+                        is Resource.Error -> {
+                            showLoading(false)
+                            isButtonEnabled(true)
+                            handleLoginError(result.message)
+                        }
+                        else -> {
+                            showLoading(false)
+                            isButtonEnabled(true)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun showErrorBottomSheet(errorMessage: String) {
@@ -130,7 +165,6 @@ class LoginActivity : AppCompatActivity() {
     private fun isButtonEnabled(isEnabled: Boolean) {
         Log.d("LoginActivity", "isButtonEnabled called with: $isEnabled")
         binding.btnLogin.isEnabled = isEnabled
-        // Tidak perlu set background color di sini karena sudah diatur oleh selector drawable
     }
 
     private fun showLoading(isLoading: Boolean) {
@@ -171,10 +205,22 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun startLogin() {
+        if (!isInternetAvailable(this)) {
+            showErrorBottomSheet(getString(R.string.check_internet))
+            return
+        }
+
         val email = binding.edLoginEmail.text.toString()
-        val password = binding.edLoginPass.text.toString()
+        Log.d("LoginActivity", "Starting activation check for email: $email")
         showLoading(true)
         isButtonEnabled(false)
+        loginViewModel.checkActivation(email)
+    }
+
+    private fun proceedWithLogin() {
+        val email = binding.edLoginEmail.text.toString()
+        val password = binding.edLoginPass.text.toString()
+        Log.d("LoginActivity", "Proceeding with login for email: $email")
         loginViewModel.login(email, password)
     }
 
@@ -210,5 +256,21 @@ class LoginActivity : AppCompatActivity() {
         val intent = Intent(this, RegisterActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
+    }
+
+    private fun navigateToOtpActivity(userId: String, email: String) {
+        Log.d("LoginActivity", "Navigating to OTP with userId: $userId, email: $email")
+        val intent = Intent(this, OtpActivity::class.java).apply {
+            putExtra(EXTRA_USER_ID, userId)
+            putExtra(EXTRA_EMAIL, email)
+            putExtra(EXTRA_AUTO_SEND_OTP, true) // Dari login, langsung kirim OTP
+        }
+        startActivity(intent)
+    }
+
+    companion object {
+        const val EXTRA_USER_ID = "USER_ID"
+        const val EXTRA_EMAIL = "EMAIL"
+        const val EXTRA_AUTO_SEND_OTP = "AUTO_SEND_OTP"
     }
 }

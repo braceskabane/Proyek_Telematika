@@ -1,9 +1,11 @@
 package com.dicoding.hanebado.core.utils.datamapper
 
+import com.dicoding.hanebado.core.data.source.remote.response.ActiveResponse
 import com.dicoding.hanebado.core.data.source.remote.response.LoginResponse
 import com.dicoding.hanebado.core.data.source.remote.response.OtpResponse
 import com.dicoding.hanebado.core.data.source.remote.response.RegisterResponse
 import com.dicoding.hanebado.core.data.source.remote.response.ResendOtpResponse
+import com.dicoding.hanebado.core.domain.auth.model.ActiveCheckDomain
 import com.dicoding.hanebado.core.domain.auth.model.LoginDomain
 import com.dicoding.hanebado.core.domain.auth.model.OtpDomain
 import com.dicoding.hanebado.core.domain.auth.model.RegisterDomain
@@ -39,6 +41,18 @@ object AuthDataMapper {
             message = response.message ?: ""
         )
     }
+
     fun ResendOtpResponse.toDomain() = ResendOtpDomain(message)
+
+    fun ActiveResponse.toDomain(): ActiveCheckDomain {
+        return ActiveCheckDomain(
+            id = id ?: "",
+            email = email ?: "",
+            name = name ?: "",
+            isActivated = isActivated ?: false,
+            createdAt = createdAt ?: "",
+            updatedAt = updatedAt ?: ""
+        )
+    }
 
 }

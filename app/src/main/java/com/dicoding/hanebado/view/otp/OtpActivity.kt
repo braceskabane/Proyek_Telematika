@@ -26,15 +26,20 @@ class OtpActivity : AppCompatActivity() {
     private val viewModel: OtpViewModel by viewModels()
 
     private var userId: String = ""
+    private var email: String = ""
     private var timer: CountDownTimer? = null
+    private var shouldAutoSendOtp: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityOtpBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        userId = intent.getStringExtra("USER_ID") ?: ""
-        Log.d("OtpActivity", "Received USER_ID: $userId")
+        userId = intent.getStringExtra(LoginActivity.EXTRA_USER_ID) ?: ""
+        email = intent.getStringExtra(LoginActivity.EXTRA_EMAIL) ?: ""
+        shouldAutoSendOtp = intent.getBooleanExtra(LoginActivity.EXTRA_AUTO_SEND_OTP, false)
+
+        Log.d("OtpActivity", "Received userId: $userId, email: $email, autoSend: $shouldAutoSendOtp")
 
         if (userId.isEmpty()) {
             Log.e("OtpActivity", "No USER_ID received")
@@ -43,11 +48,25 @@ class OtpActivity : AppCompatActivity() {
             return
         }
 
+        // Enable refresh button initially
+        binding.ivOtpRefresh.isEnabled = true
+
         setupOtpInputs()
         setupButtons()
-        startTimer()
         observeOtpResult()
         observeResendOtpResult()
+
+        // Jika perlu auto send, langsung request OTP
+        if (shouldAutoSendOtp) {
+            requestInitialOtp()
+        }
+    }
+
+    private fun requestInitialOtp() {
+        Log.d("OtpActivity", "Requesting initial OTP")
+        clearOtpInputs()
+        binding.ivOtpRefresh.isEnabled = false
+        viewModel.resendOTP(userId)
     }
 
     private fun setupOtpInputs() {
@@ -71,20 +90,21 @@ class OtpActivity : AppCompatActivity() {
     private fun setupButtons() {
         binding.btnOtpContinue.setOnClickListener {
             val otp = getOtpFromInputs()
-            Log.d("OtpActivity", "OTP entered: $otp")
             if (otp.length == 6) {
-                Log.d("OtpActivity", "Activating OTP for userId: $userId, OTP: $otp")
                 viewModel.activateOtp(userId, otp)
             } else {
-                Log.w("OtpActivity", "Invalid OTP length: ${otp.length}")
-                Toast.makeText(this, "Please enter a valid OTP", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Mohon masukkan kode OTP yang valid", Toast.LENGTH_SHORT).show()
             }
         }
 
         binding.ivOtpRefresh.setOnClickListener {
-            Log.d("OtpActivity", "Resending OTP for userId: $userId")
+            Log.d("OtpActivity", "Refresh button clicked")
+            // Disable button sementara
+            binding.ivOtpRefresh.isEnabled = false
+            // Clear input fields
+            clearOtpInputs()
+            // Request resend
             viewModel.resendOTP(userId)
-            startTimer()
         }
     }
 
@@ -98,6 +118,9 @@ class OtpActivity : AppCompatActivity() {
     private fun startTimer() {
         Log.d("OtpActivity", "Starting timer")
         timer?.cancel()
+
+        binding.ivOtpRefresh.isEnabled = false // Disable refresh button
+
         timer = object : CountDownTimer(15 * 60 * 1000, 1000) {
             @SuppressLint("DefaultLocale")
             override fun onTick(millisUntilFinished: Long) {
@@ -109,6 +132,8 @@ class OtpActivity : AppCompatActivity() {
             @SuppressLint("SetTextI18n")
             override fun onFinish() {
                 binding.tvOtpTimer.text = "00:00"
+                binding.ivOtpRefresh.isEnabled = true // Enable refresh button
+                Log.d("OtpActivity", "Timer finished, refresh button enabled")
             }
         }.start()
     }
@@ -151,18 +176,25 @@ class OtpActivity : AppCompatActivity() {
                         is Resource.Success -> {
                             Log.d("OtpActivity", "OTP resend successful: ${result.data?.message}")
                             Toast.makeText(this@OtpActivity, result.data?.message, Toast.LENGTH_SHORT).show()
-                            startTimer()
+                            startTimer() // Timer akan men-disable button
+                            clearOtpInputs()
                         }
                         is Resource.Error -> {
                             Log.e("OtpActivity", "OTP resend error: ${result.message}")
                             Toast.makeText(this@OtpActivity, "Failed to resend OTP: ${result.message}", Toast.LENGTH_SHORT).show()
+                            binding.ivOtpRefresh.isEnabled = true // Enable button jika error
+                            timer?.cancel() // Cancel timer jika error
+                            binding.tvOtpTimer.text = "00:00" // Reset timer display
                         }
                         is Resource.Loading -> {
                             Log.d("OtpActivity", "OTP resend loading")
-                            // Show loading indicator if needed
+                            binding.ivOtpRefresh.isEnabled = false
                         }
                         else -> {
                             Log.w("OtpActivity", "Unexpected resend OTP result: $result")
+                            binding.ivOtpRefresh.isEnabled = true
+                            timer?.cancel()
+                            binding.tvOtpTimer.text = "00:00"
                         }
                     }
                 }
@@ -170,10 +202,28 @@ class OtpActivity : AppCompatActivity() {
         }
     }
 
+    private fun clearOtpInputs() {
+        with(binding) {
+            etOtp1.text?.clear()
+            etOtp2.text?.clear()
+            etOtp3.text?.clear()
+            etOtp4.text?.clear()
+            etOtp5.text?.clear()
+            etOtp6.text?.clear()
+            etOtp1.requestFocus()
+        }
+    }
 
     override fun onDestroy() {
         super.onDestroy()
         Log.d("OtpActivity", "OtpActivity destroyed")
         timer?.cancel()
+        timer = null
+    }
+
+    companion object {
+        const val EXTRA_USER_ID = "USER_ID"
+        const val EXTRA_EMAIL = "EMAIL"
+        const val EXTRA_AUTO_SEND_OTP = "AUTO_SEND_OTP"
     }
 }

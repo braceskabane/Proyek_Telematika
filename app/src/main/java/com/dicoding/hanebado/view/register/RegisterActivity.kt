@@ -13,7 +13,6 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.dicoding.hanebado.R
 import com.dicoding.hanebado.core.data.source.Resource
-import com.dicoding.hanebado.core.utils.isInternetAvailable
 import com.dicoding.hanebado.core.utils.showToast
 import com.dicoding.hanebado.databinding.ActivityRegisterBinding
 import com.dicoding.hanebado.view.login.LoginActivity
@@ -144,38 +143,25 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun handleButtonRegister() {
-        binding.tvLogin.setOnClickListener{
+        binding.tvLogin.setOnClickListener {
             navigateToLoginActivity()
         }
         binding.btnRegister.setOnClickListener {
+            val name = binding.edRegisterName.text.toString()
             val email = binding.edRegisterEmail.text.toString()
             val password = binding.edRegisterPass.text.toString()
-            val name = binding.edRegisterName.text.toString()
 
             registerViewModel.register(name, email, password).observe(this) { result ->
                 when (result) {
                     is Resource.Error -> {
                         showLoading(false)
                         isButtonEnabled(true)
-
-                        if (!isInternetAvailable(this)) {
-                            showToast(getString(R.string.check_internet))
-                        } else {
-                            showToast("Pastikan email dan password telah benar")
-                        }
-
+                        showToast(result.message ?: "Terjadi kesalahan")
                     }
 
                     is Resource.Loading -> {
                         showLoading(true)
                         isButtonEnabled(false)
-                    }
-
-                    is Resource.Message -> {
-                        showLoading(false)
-                        isButtonEnabled(true)
-
-                        Log.d("RegisterActivity", result.message.toString())
                     }
 
                     is Resource.Success -> {
@@ -185,10 +171,13 @@ class RegisterActivity : AppCompatActivity() {
 
                         val userId = result.data?.user?.id
                         if (userId != null) {
-                            navigateToOtpActivity(userId)
+                            navigateToOtpActivity(userId, email)
                         } else {
                             showToast("Error: User ID not found")
-                            Log.e("RegisterActivity", "User ID is null after successful registration")
+                            Log.e(
+                                "RegisterActivity",
+                                "User ID is null after successful registration"
+                            )
                         }
                     }
 
@@ -208,10 +197,13 @@ class RegisterActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    private fun navigateToOtpActivity(userId: String) {
+    private fun navigateToOtpActivity(userId: String, email: String) {
+        Log.d("RegisterActivity", "Navigating to OTP Activity with userId: $userId, email: $email")
         val intent = Intent(this, OtpActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            putExtra("USER_ID", userId)
+            putExtra(OtpActivity.EXTRA_USER_ID, userId)
+            putExtra(OtpActivity.EXTRA_EMAIL, email)
+            putExtra(OtpActivity.EXTRA_AUTO_SEND_OTP, true)
         }
         startActivity(intent)
     }
