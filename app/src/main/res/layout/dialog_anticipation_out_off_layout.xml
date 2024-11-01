@@ -5,6 +5,7 @@
     android:layout_height="450dp"
     android:minHeight="450dp"
     android:background="@drawable/custom_background_dialog_bottom"
+    android:backgroundTint="@color/red"
     android:padding="12dp">
 
 
@@ -31,13 +32,13 @@
                 android:layout_height="100dp"
                 android:layout_gravity="center"
                 android:layout_marginBottom="32dp"
-                android:src="@drawable/icon_anticipation_prepare"/>
+                android:src="@drawable/icon_warning"/>
 
             <TextView
                 style="@style/textStyleSemIBold_32"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Anticipation Test"
+                android:text="Too late!"
                 android:textAlignment="center"
                 android:textColor="@color/white" />
 
@@ -46,20 +47,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="Tap the screen when you think the ball reaches the second line"
+                android:text="Click the button if you are ready "
                 android:textAlignment="center"
                 android:textColor="@color/white" />
 
             <Button
                 style="@style/textStyleSemIBold_20"
-                android:id="@+id/btn_ready"
+                android:id="@+id/btn_ready_to_fast"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:padding="10dp"
                 android:layout_gravity="center"
-                android:textColor="@color/white"
-                android:backgroundTint="@color/anticipation"
+                android:textColor="@color/red"
+                android:backgroundTint="@color/white"
                 android:text="READY" />
         </LinearLayout>
 

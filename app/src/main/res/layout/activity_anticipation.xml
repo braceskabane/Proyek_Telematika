@@ -8,6 +8,40 @@
     android:background="@drawable/custom_background_home_daily_plan"
     tools:context=".view.dashboard.anticipation.AnticipationActivity">
 
+    <!-- Batasan atas -->
+    <View
+        android:id="@+id/topLine"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="#1b1a1b"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <!-- Batasan bawah -->
+    <View
+        android:id="@+id/midLine"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginBottom="300dp"
+        android:background="@color/anticipation"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <!-- Batasan Paling bawah -->
+    <View
+        android:id="@+id/lowestLine"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+    <!-- Batasan bawah -->
+    <View
+        android:id="@+id/bottomLine"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginBottom="100dp"
+        android:background="@color/anticipation"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
     <ImageView
         android:id="@+id/ball"
         android:layout_width="30dp"
@@ -16,6 +50,6 @@
         android:src="@drawable/custom_ball"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintTop_toTopOf="@id/topLine"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

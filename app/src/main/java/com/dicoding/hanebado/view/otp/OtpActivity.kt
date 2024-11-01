@@ -48,27 +48,23 @@ class OtpActivity : AppCompatActivity() {
             return
         }
 
-        // Enable refresh button initially
-        binding.ivOtpRefresh.isEnabled = true
-
         setupOtpInputs()
         setupButtons()
         observeOtpResult()
         observeResendOtpResult()
 
-        // Jika perlu auto send, langsung request OTP
+        // Jika dari register (autoSend true), langsung mulai timer karena OTP sudah dikirim
         if (shouldAutoSendOtp) {
-            requestInitialOtp()
-        }else {
-
-            startTimer()
+            startTimer()  // Langsung start timer karena OTP sudah dikirim saat register
+        } else {
+            // Jika bukan dari register, perlu request OTP baru
+            requestInitialOtp()  // Ini akan request OTP dan memulai timer
         }
     }
 
     private fun requestInitialOtp() {
         Log.d("OtpActivity", "Requesting initial OTP")
         clearOtpInputs()
-        binding.ivOtpRefresh.isEnabled = false
         viewModel.resendOTP(userId)
     }
 
@@ -102,15 +98,12 @@ class OtpActivity : AppCompatActivity() {
 
         binding.ivOtpRefresh.setOnClickListener {
             Log.d("OtpActivity", "Refresh button clicked")
-            // Disable button sementara
-            binding.ivOtpRefresh.isEnabled = false
-            // Clear input fields
             clearOtpInputs()
-            // Request resend
             viewModel.resendOTP(userId)
+            startTimer()  // Reset timer setelah OTP di-refresh
+            Log.d("OtpActivity", "Resend OTP called with userId: $userId")
         }
     }
-
 
     private fun getOtpFromInputs(): String {
         return with(binding) {
@@ -121,8 +114,9 @@ class OtpActivity : AppCompatActivity() {
     private fun startTimer() {
         Log.d("OtpActivity", "Starting timer")
         timer?.cancel()
+        timer = null
 
-        binding.ivOtpRefresh.isEnabled = false // Disable refresh button
+        Log.d("OtpActivity", "Refresh button disabled for timer")
 
         timer = object : CountDownTimer(15 * 60 * 1000, 1000) {
             @SuppressLint("DefaultLocale")
@@ -135,7 +129,7 @@ class OtpActivity : AppCompatActivity() {
             @SuppressLint("SetTextI18n")
             override fun onFinish() {
                 binding.tvOtpTimer.text = "00:00"
-                binding.ivOtpRefresh.isEnabled = true // Enable refresh button
+                timer = null
                 Log.d("OtpActivity", "Timer finished, refresh button enabled")
             }
         }.start()
@@ -179,30 +173,31 @@ class OtpActivity : AppCompatActivity() {
                         is Resource.Success -> {
                             Log.d("OtpActivity", "OTP resend successful: ${result.data?.message}")
                             Toast.makeText(this@OtpActivity, result.data?.message, Toast.LENGTH_SHORT).show()
-                            startTimer() // Timer akan men-disable button
+                            if (!isTimerRunning()) {
+                                startTimer()
+                            }
                             clearOtpInputs()
                         }
                         is Resource.Error -> {
                             Log.e("OtpActivity", "OTP resend error: ${result.message}")
                             Toast.makeText(this@OtpActivity, "Failed to resend OTP: ${result.message}", Toast.LENGTH_SHORT).show()
-                            binding.ivOtpRefresh.isEnabled = true // Enable button jika error
-                            timer?.cancel() // Cancel timer jika error
-                            binding.tvOtpTimer.text = "00:00" // Reset timer display
                         }
                         is Resource.Loading -> {
                             Log.d("OtpActivity", "OTP resend loading")
-                            binding.ivOtpRefresh.isEnabled = false
                         }
                         else -> {
                             Log.w("OtpActivity", "Unexpected resend OTP result: $result")
-                            binding.ivOtpRefresh.isEnabled = true
-                            timer?.cancel()
-                            binding.tvOtpTimer.text = "00:00"
+                            if (!isTimerRunning()) {
+                            }
                         }
                     }
                 }
             }
         }
+    }
+
+    private fun isTimerRunning(): Boolean {
+        return timer != null
     }
 
     private fun clearOtpInputs() {

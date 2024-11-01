@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="450dp"
     android:minHeight="450dp"
-    android:background="@drawable/custom_background_dialog_bottom"
+    android:background="@drawable/custom_background_dialog_upper"
     android:padding="12dp">
 
     <androidx.appcompat.widget.AppCompatButton
@@ -15,7 +15,7 @@
         android:background="@null"
         android:text="reset"
         android:textAllCaps="false"
-        android:textColor="@color/reflex"
+        android:textColor="@color/anticipation"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
@@ -27,7 +27,7 @@
         android:background="@null"
         android:text="sound"
         android:textAllCaps="false"
-        android:textColor="@color/reflex"
+        android:textColor="@color/anticipation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
@@ -69,16 +69,16 @@
                         android:layout_width="60dp"
                         android:layout_height="60dp"
                         android:background="@drawable/custom_navbar_background"
-                        android:backgroundTint="@color/reflex"
+                        android:backgroundTint="@color/anticipation"
                         android:padding="8dp"
-                        android:src="@drawable/icon_stopwatch" />
+                        android:src="@drawable/icon_anticipation_cat" />
                     <TextView
-                        android:id="@+id/tv_recent_time"
+                        android:id="@+id/tv_recent_distance"
                         style="@style/textStyleSemIBold_50"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="1000 ms"
+                        android:text="10%"
                         android:textColor="@color/white"
                         android:layout_marginStart="16dp"/>
                 </LinearLayout>
@@ -90,15 +90,6 @@
                     android:text="Click the button to try again"
                     android:textColor="@color/dark_grey"
                     android:layout_marginTop="16dp"/>
-                <TextView
-                    style="@style/textStyleSemIBold_20"
-                    android:id="@+id/tv_fastest_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="Fastest: 287 ms"
-                    android:textColor="@color/white"
-                    android:layout_marginTop="16dp"/>
                 <Button
                     style="@style/textStyleButton20"
                     android:id="@+id/btn_ready_next"
@@ -107,7 +98,7 @@
                     android:layout_marginTop="32dp"
                     android:padding="12dp"
                     android:textStyle="bold"
-                    android:backgroundTint="@color/reflex"
+                    android:backgroundTint="@color/anticipation"
                     android:text="Ready" />
             </LinearLayout>
         </LinearLayout>

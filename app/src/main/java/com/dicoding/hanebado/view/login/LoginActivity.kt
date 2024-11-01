@@ -263,7 +263,7 @@ class LoginActivity : AppCompatActivity() {
         val intent = Intent(this, OtpActivity::class.java).apply {
             putExtra(EXTRA_USER_ID, userId)
             putExtra(EXTRA_EMAIL, email)
-            putExtra(EXTRA_AUTO_SEND_OTP, true) // Dari login, langsung kirim OTP
+            putExtra(EXTRA_AUTO_SEND_OTP, false) // Dari login, langsung kirim OTP
         }
         startActivity(intent)
     }

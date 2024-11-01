@@ -154,7 +154,7 @@
                     android:layout_gravity="center"
                     android:layout_marginEnd="4dp"
                     android:gravity="end"
-                    android:text="04:24" />
+                    android:text="00:00" />
             </LinearLayout>
 
             <LinearLayout
@@ -165,12 +165,13 @@
 
                 <ImageButton
                     android:id="@+id/ivOtpRefresh"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_marginStart="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_gravity="start"
+                    android:layout_marginStart="4dp"
                     android:background="@null"
-                    android:importantForAccessibility="no"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:src="@drawable/icon_refresh" />
             </LinearLayout>
         </LinearLayout>
