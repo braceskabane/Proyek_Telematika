@@ -31,36 +31,49 @@
                 android:layout_height="100dp"
                 android:layout_gravity="center"
                 android:layout_marginBottom="32dp"
-                android:src="@drawable/icon_anticipation_prepare"/>
+                android:src="@drawable/icon_reflex_thunder"/>
 
             <TextView
                 style="@style/textStyleSemIBold_32"
+                android:id="@+id/tv_result"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Anticipation Test"
+                android:text="Pembalap F1"
                 android:textAlignment="center"
                 android:textColor="@color/white" />
 
             <TextView
                 style="@style/textStyleSemIBold_20"
+                android:id="@+id/tv_result_mean"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="Less than 100ms"
+                android:textAlignment="center"
+                android:textColor="@color/reflex" />
+
+
+            <TextView
+                style="@style/textStyleSemIBold_20"
+                android:id="@+id/tv_result_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="when the ball is moving make sure it hits the second line."
+                android:text="Lightning-fast reflexes, processing information at superhuman speeds"
                 android:textAlignment="center"
-                android:textColor="@color/white" />
+                android:textColor="@color/dark_grey" />
 
             <Button
                 style="@style/textStyleSemIBold_20"
-                android:id="@+id/btn_ready"
+                android:id="@+id/btn_well_done"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:padding="10dp"
                 android:layout_gravity="center"
                 android:textColor="@color/white"
-                android:backgroundTint="@color/anticipation"
-                android:text="READY" />
+                android:backgroundTint="@color/reflex"
+                android:text="Save" />
         </LinearLayout>
 
     </LinearLayout>

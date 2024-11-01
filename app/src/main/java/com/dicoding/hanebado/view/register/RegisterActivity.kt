@@ -203,7 +203,7 @@ class RegisterActivity : AppCompatActivity() {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             putExtra(OtpActivity.EXTRA_USER_ID, userId)
             putExtra(OtpActivity.EXTRA_EMAIL, email)
-            putExtra(OtpActivity.EXTRA_AUTO_SEND_OTP, true)
+            putExtra(OtpActivity.EXTRA_AUTO_SEND_OTP, false)
         }
         startActivity(intent)
     }

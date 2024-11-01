@@ -59,6 +59,9 @@ class OtpActivity : AppCompatActivity() {
         // Jika perlu auto send, langsung request OTP
         if (shouldAutoSendOtp) {
             requestInitialOtp()
+        }else {
+
+            startTimer()
         }
     }
 
