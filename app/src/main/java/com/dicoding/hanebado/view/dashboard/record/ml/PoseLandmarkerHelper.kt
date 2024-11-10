@@ -28,8 +28,12 @@ class PoseLandmarkerHelper(
     // this listener is only used when running in RunningMode.LIVE_STREAM
     val poseLandmarkerHelperListener: LandmarkerListener? = null
 ) {
-    private var poseLandmarker: PoseLandmarker? = null
 
+    // For this example this needs to be a var so it can be reset on changes.
+    // If the Pose Landmarker will not change, a lazy val would be preferable.
+
+    private var poseLandmarker: PoseLandmarker? = null
+    private val poseClassifier = PoseClassifier(context, "plank_detector.tflite")
     init {
         setupPoseLandmarker()
     }
@@ -39,6 +43,7 @@ class PoseLandmarkerHelper(
         poseLandmarker = null
     }
 
+    // Return running status of PoseLandmarkerHelper
     fun isClose(): Boolean {
         return poseLandmarker == null
     }
@@ -317,21 +322,49 @@ class PoseLandmarkerHelper(
     }
 
     // Return the landmark result to this PoseLandmarkerHelper's caller
-    private fun returnLivestreamResult(
-        result: PoseLandmarkerResult,
-        input: MPImage
-    ) {
+    // Daftar indeks yang sesuai untuk landmark penting
+    val IMPORTANT_LMS_INDICES = listOf(
+        0, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32
+    )
+
+    private fun returnLivestreamResult(result: PoseLandmarkerResult, input: MPImage) {
         val finishTimeMs = SystemClock.uptimeMillis()
         val inferenceTime = finishTimeMs - result.timestampMs()
 
-        poseLandmarkerHelperListener?.onResults(
-            ResultBundle(
-                listOf(result),
-                inferenceTime,
-                input.height,
-                input.width
+        // Ambil landmark dari hasil pose
+        val landmarks = result.landmarks().firstOrNull()
+        if (landmarks != null) {
+            // Buat array inputLandmarks hanya untuk landmark penting
+            val inputLandmarks = FloatArray(IMPORTANT_LMS_INDICES.size * 4)
+
+            for (i in IMPORTANT_LMS_INDICES.indices) {
+                val landmarkIndex = IMPORTANT_LMS_INDICES[i]
+                val landmark = landmarks[landmarkIndex]
+                inputLandmarks[i * 4] = landmark.x()
+                inputLandmarks[i * 4 + 1] = landmark.y()
+                inputLandmarks[i * 4 + 2] = landmark.z()
+                inputLandmarks[i * 4 + 3] = 1.0f  // Asumsikan visibility 100%
+            }
+
+            // Klasifikasi pose
+            val poseLabel = poseClassifier.classifyPose(inputLandmarks)
+            val poseConfidence = poseClassifier.confidence
+            // Kirim hasil klasifikasi ke listener atau UI
+            poseLandmarkerHelperListener?.onResults(
+                ResultBundle(
+                    listOf(result),
+                    inferenceTime,
+                    input.height,
+                    input.width
+                )
             )
-        )
+
+            // Kirim pose label ke listener
+            poseLandmarkerHelperListener?.onPoseResult(poseLabel, poseConfidence)
+
+            // Log atau tampilkan hasil pose di UI
+            Log.d(TAG, "Pose: $poseLabel, Confidence: $poseConfidence")
+        }
     }
 
     // Return errors thrown during detection to this PoseLandmarkerHelper's
@@ -356,37 +389,7 @@ class PoseLandmarkerHelper(
         const val MODEL_POSE_LANDMARKER_FULL = 0
         const val MODEL_POSE_LANDMARKER_LITE = 1
         const val MODEL_POSE_LANDMARKER_HEAVY = 2
-
-        val CONNECTION_LIST = listOf(
-            // Kepala
-            listOf(0, 1),    // Hidung ke mata kiri
-            listOf(0, 4),    // Hidung ke mata kanan
-            listOf(1, 2),    // Mata kiri ke telinga kiri
-            listOf(4, 5),    // Mata kanan ke telinga kanan
-
-            // Tubuh
-            listOf(11, 12),  // Bahu kiri ke bahu kanan
-            listOf(11, 13),  // Bahu kiri ke siku kiri
-            listOf(13, 15),  // Siku kiri ke pergelangan tangan kiri
-            listOf(12, 14),  // Bahu kanan ke siku kanan
-            listOf(14, 16),  // Siku kanan ke pergelangan tangan kanan
-
-            // Pinggul dan kaki
-            listOf(11, 23),  // Bahu kiri ke pinggul kiri
-            listOf(12, 24),  // Bahu kanan ke pinggul kanan
-            listOf(23, 24),  // Pinggul kiri ke pinggul kanan
-            listOf(23, 25),  // Pinggul kiri ke lutut kiri
-            listOf(25, 27),  // Lutut kiri ke pergelangan kaki kiri
-            listOf(27, 29),  // Pergelangan kaki kiri ke tumit kiri
-            listOf(29, 31),  // Tumit kiri ke jari kaki kiri
-            listOf(24, 26),  // Pinggul kanan ke lutut kanan
-            listOf(26, 28),  // Lutut kanan ke pergelangan kaki kanan
-            listOf(28, 30),  // Pergelangan kaki kanan ke tumit kanan
-            listOf(30, 32)   // Tumit kanan ke jari kaki kanan
-        )
     }
-
-
 
     data class ResultBundle(
         val results: List<PoseLandmarkerResult>,
@@ -398,5 +401,6 @@ class PoseLandmarkerHelper(
     interface LandmarkerListener {
         fun onError(error: String, errorCode: Int = OTHER_ERROR)
         fun onResults(resultBundle: ResultBundle)
+        fun onPoseResult(poseLabel: String, poseConfidence: Float)
     }
 }

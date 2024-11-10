@@ -7,30 +7,6 @@
     android:background="@drawable/custom_background_dialog_upper"
     android:padding="12dp">
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btn_reset"
-        style="@style/textStyleSemIBold_14"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@null"
-        android:text="reset"
-        android:textAllCaps="false"
-        android:textColor="@color/anticipation"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btn_sound"
-        style="@style/textStyleSemIBold_14"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@null"
-        android:text="sound"
-        android:textAllCaps="false"
-        android:textColor="@color/anticipation"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-
     <LinearLayout
         android:id="@+id/linearLayout2"
         android:layout_width="match_parent"

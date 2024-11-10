@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.AspectRatio
@@ -19,10 +20,10 @@ import com.dicoding.hanebado.R
 import com.dicoding.hanebado.databinding.ActivityRecordBinding
 import com.dicoding.hanebado.view.dashboard.record.ml.OverlayView
 import com.dicoding.hanebado.view.dashboard.record.ml.PoseLandmarkerHelper
+import com.dicoding.hanebado.view.dashboard.record.ml.PoseLandmarkerHelper.Companion.MODEL_POSE_LANDMARKER_FULL
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-
 
 class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListener {
     private lateinit var binding: ActivityRecordBinding
@@ -55,9 +56,12 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
                 minPoseTrackingConfidence = PoseLandmarkerHelper.DEFAULT_POSE_TRACKING_CONFIDENCE,
                 minPosePresenceConfidence = PoseLandmarkerHelper.DEFAULT_POSE_PRESENCE_CONFIDENCE,
                 currentDelegate = PoseLandmarkerHelper.DELEGATE_CPU,
-                poseLandmarkerHelperListener = this
+                poseLandmarkerHelperListener = this,
+                currentModel = MODEL_POSE_LANDMARKER_FULL
             )
         }
+
+        setupPlankStatusView()
 
         if (allPermissionsGranted()) {
             startCamera()
@@ -65,6 +69,54 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
             ActivityCompat.requestPermissions(
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
             )
+        }
+    }
+
+    override fun onResults(resultBundle: PoseLandmarkerHelper.ResultBundle) {
+        runOnUiThread {
+            // Update overlay view dengan pose landmarks
+            overlayView.setResults(
+                resultBundle.results.first(),
+                resultBundle.inputImageHeight,
+                resultBundle.inputImageWidth,
+                RunningMode.LIVE_STREAM
+            )
+
+            // Force a redraw
+            overlayView.invalidate()
+        }
+    }
+
+
+
+    override fun onPoseResult(poseLabel: String, poseConfidence: Float) {
+        runOnUiThread {
+            binding.apply {
+                tvPlankStatus.text = poseLabel
+                tvPlankStatus.setTextColor(
+                    ContextCompat.getColor(
+                        this@RecordActivity,
+                        when (poseLabel) {
+                            "Correct" -> R.color.green
+                            "High Back" -> R.color.orange_100
+                            "Low Back" -> R.color.red_100
+                            else -> R.color.grey_navbar
+                        }
+                    )
+                )
+
+                // Tampilkan probabilitas
+                tvPlankConfidence.text = String.format("Confidence: %.1f%%", poseConfidence * 100)
+
+                // Panduan berdasarkan pose
+                tvPlankGuide.text = when (poseLabel) {
+                    "Correct" -> "Great form! Maintain this position"
+                    "High Back" -> "Lower your back"
+                    "Low Back" -> "Raise your back"
+                    "Uncertain" -> "Please position yourself correctly"
+                    else -> "Adjusting..."
+                }
+            }
         }
     }
 
@@ -113,26 +165,31 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     }
 
     private fun detectPose(imageProxy: ImageProxy) {
-        if (::poseLandmarkerHelper.isInitialized) {
-            poseLandmarkerHelper.detectLiveStream(
-                imageProxy = imageProxy,
-                isFrontCamera = cameraFacing == CameraSelector.LENS_FACING_FRONT
-            )
-        }
+        poseLandmarkerHelper.detectLiveStream(
+            imageProxy = imageProxy,
+            isFrontCamera = cameraFacing == CameraSelector.LENS_FACING_FRONT
+        )
     }
 
-    override fun onResults(resultBundle: PoseLandmarkerHelper.ResultBundle) {
-        runOnUiThread {
-            // Update overlay view with pose landmarks
-            overlayView.setResults(
-                resultBundle.results.first(),
-                resultBundle.inputImageHeight,
-                resultBundle.inputImageWidth,
-                RunningMode.LIVE_STREAM
-            )
-
-            // Force a redraw
-            overlayView.invalidate()
+    private fun setupPlankStatusView() {
+        binding.apply {
+            statusCard.apply {
+                visibility = View.VISIBLE
+                elevation = 8f
+                radius = 16f
+            }
+            tvPlankStatus.apply {
+                visibility = View.VISIBLE
+                text = "Preparing Camera..."
+            }
+            tvPlankConfidence.apply {
+                visibility = View.VISIBLE
+                text = "Position yourself in frame"
+            }
+            tvPlankGuide.apply {
+                visibility = View.VISIBLE
+                text = "Waiting for pose detection..."
+            }
         }
     }
 
@@ -170,21 +227,17 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     override fun onResume() {
         super.onResume()
         // Restart pose detection if needed
-        if (::poseLandmarkerHelper.isInitialized) {
-            backgroundExecutor.execute {
-                if (poseLandmarkerHelper.isClose()) {
-                    poseLandmarkerHelper.setupPoseLandmarker()
-                }
+        backgroundExecutor.execute {
+            if (poseLandmarkerHelper.isClose()) {
+                poseLandmarkerHelper.setupPoseLandmarker()
             }
         }
     }
 
     override fun onPause() {
         super.onPause()
-        if (::poseLandmarkerHelper.isInitialized) {
-            backgroundExecutor.execute {
-                poseLandmarkerHelper.clearPoseLandmarker()
-            }
+        backgroundExecutor.execute {
+            poseLandmarkerHelper.clearPoseLandmarker()
         }
     }
 

@@ -21,9 +21,9 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080\"")
-        buildConfigField("String", "BASE_URL", "\"http://10.3.142.61:8080\"")
-//        buildConfigField("String", "BASE_URL", "\"http://10.3.142.56:8080\"")
+//        buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080\"")
+        buildConfigField("String", "BASE_URL", "\"http://172.20.10.3:8080\"")
+        buildConfigField("String", "BASE_URL", "\"http://192.168.69.201:8080\"")
 //        buildConfigField("String", "BASE_URL", "\"http://192.168.30.49:8080\"")
 
 
@@ -52,6 +52,10 @@ android {
     buildFeatures {
         viewBinding = true
         buildConfig = true
+        mlModelBinding = true
+    }
+    aaptOptions {
+        noCompress.add("tflite")
     }
 }
 
@@ -79,6 +83,9 @@ dependencies {
     implementation(libs.androidx.paging.common.android)
     implementation(libs.androidx.paging.runtime.ktx)
     implementation(libs.feature.delivery.ktx)
+    implementation(libs.tensorflow.lite.support)
+    implementation(libs.tensorflow.lite.metadata)
+//    implementation(libs.litert.support.api)
     ksp(libs.room.compiler)
     androidTestImplementation(libs.room.testing)
 
@@ -126,6 +133,13 @@ dependencies {
 
     // MediaPipe Tasks Vision
     implementation(libs.mediapipe.tasks.vision)
+
+    // TensorFlow Lite
+    implementation(libs.tensorflow.lite)
+    implementation(libs.tensorflow.lite.support)
+    implementation(libs.tensorflow.lite.metadata)
+    implementation(libs.tensorflow.lite.gpu)
+    implementation (libs.tensorflow.lite.task.vision)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

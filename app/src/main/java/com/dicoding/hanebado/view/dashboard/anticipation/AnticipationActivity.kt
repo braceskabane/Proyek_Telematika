@@ -86,9 +86,10 @@ class AnticipationActivity : AppCompatActivity() {
     private fun startAnimation() {
         binding.ball.visibility = View.VISIBLE
         val totalDistance = binding.root.height - binding.topLine.y
+        val randomDuration = (3000..8000).random().toLong()
 
         animator = ValueAnimator.ofFloat(0f, totalDistance).apply {
-            duration = 5000 // durasi animasi, misalnya 5 detik
+            duration = randomDuration
             interpolator = LinearInterpolator()
 
             addUpdateListener { animation ->

@@ -39,15 +39,6 @@ class AnticipationDoneDialog : DialogFragment() {
             dismiss()
             onReadyNextClick?.invoke()
         }
-
-        binding.btnReset.setOnClickListener {
-            dismiss()
-            onResetClick?.invoke()
-        }
-
-        binding.btnSound.setOnClickListener {
-            onSoundClick?.invoke()
-        }
     }
 
     override fun onStart() {

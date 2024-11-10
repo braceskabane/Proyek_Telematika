@@ -16,6 +16,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.dicoding.hanebado.core.data.source.Resource
 import com.dicoding.hanebado.databinding.ActivityOtpBinding
 import com.dicoding.hanebado.view.login.LoginActivity
+import com.dicoding.hanebado.view.welcome.WelcomeActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -84,6 +85,19 @@ class OtpActivity : AppCompatActivity() {
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             })
         }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        // Bersihkan timer dan state
+        timer?.cancel()
+        timer = null
+
+        // Arahkan ke WelcomeActivity dan hapus stack activity sebelumnya
+        val intent = Intent(this, WelcomeActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 
     private fun setupButtons() {
