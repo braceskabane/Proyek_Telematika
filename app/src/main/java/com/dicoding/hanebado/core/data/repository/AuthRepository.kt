@@ -6,11 +6,11 @@ import com.dicoding.hanebado.core.data.source.Resource
 import com.dicoding.hanebado.core.data.source.local.datastore.DataStoreManager
 import com.dicoding.hanebado.core.data.source.remote.RemoteDataSource
 import com.dicoding.hanebado.core.data.source.remote.network.ApiResponse
-import com.dicoding.hanebado.core.data.source.remote.response.ActiveResponse
-import com.dicoding.hanebado.core.data.source.remote.response.LoginResponse
-import com.dicoding.hanebado.core.data.source.remote.response.OtpResponse
-import com.dicoding.hanebado.core.data.source.remote.response.RegisterResponse
-import com.dicoding.hanebado.core.data.source.remote.response.ResendOtpResponse
+import com.dicoding.hanebado.core.data.source.remote.response.auth.ActiveResponse
+import com.dicoding.hanebado.core.data.source.remote.response.auth.LoginResponse
+import com.dicoding.hanebado.core.data.source.remote.response.auth.OtpResponse
+import com.dicoding.hanebado.core.data.source.remote.response.auth.RegisterResponse
+import com.dicoding.hanebado.core.data.source.remote.response.auth.ResendOtpResponse
 import com.dicoding.hanebado.core.domain.auth.model.ActiveCheckDomain
 import com.dicoding.hanebado.core.domain.auth.model.LoginDomain
 import com.dicoding.hanebado.core.domain.auth.model.OtpDomain

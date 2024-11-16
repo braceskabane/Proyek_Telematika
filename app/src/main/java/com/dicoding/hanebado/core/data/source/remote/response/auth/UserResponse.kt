@@ -1,23 +1,14 @@
-package com.dicoding.hanebado.core.data.source.remote.response
+package com.dicoding.hanebado.core.data.source.remote.response.auth
 
 import com.google.gson.annotations.SerializedName
 
-data class RegisterResponse(
-
-	@field:SerializedName("data")
-	val data: Data? = null,
-
-	@field:SerializedName("success")
-	val success: Boolean? = null,
-
-	@field:SerializedName("message")
-	val message: String? = null
-)
-
-data class Data(
+data class UserResponse(
 
 	@field:SerializedName("createdAt")
 	val createdAt: String? = null,
+
+	@field:SerializedName("password")
+	val password: String? = null,
 
 	@field:SerializedName("name")
 	val name: String? = null,
@@ -30,6 +21,9 @@ data class Data(
 
 	@field:SerializedName("email")
 	val email: String? = null,
+
+	@field:SerializedName("refreshToken")
+	val refreshToken: String? = null,
 
 	@field:SerializedName("updatedAt")
 	val updatedAt: String? = null

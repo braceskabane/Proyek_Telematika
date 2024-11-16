@@ -3,11 +3,16 @@ package com.dicoding.hanebado.core.data.source.remote
 import android.util.Log
 import com.dicoding.hanebado.core.data.source.remote.network.ApiResponse
 import com.dicoding.hanebado.core.data.source.remote.network.ApiService
-import com.dicoding.hanebado.core.data.source.remote.response.ActiveResponse
-import com.dicoding.hanebado.core.data.source.remote.response.LoginResponse
-import com.dicoding.hanebado.core.data.source.remote.response.OtpResponse
-import com.dicoding.hanebado.core.data.source.remote.response.RegisterResponse
-import com.dicoding.hanebado.core.data.source.remote.response.ResendOtpResponse
+import com.dicoding.hanebado.core.data.source.remote.response.auth.ActiveResponse
+import com.dicoding.hanebado.core.data.source.remote.response.auth.LoginResponse
+import com.dicoding.hanebado.core.data.source.remote.response.auth.OtpResponse
+import com.dicoding.hanebado.core.data.source.remote.response.auth.RegisterResponse
+import com.dicoding.hanebado.core.data.source.remote.response.auth.ResendOtpResponse
+import com.dicoding.hanebado.core.data.source.remote.response.dailyplan.AddDailyPlanResponse
+import com.dicoding.hanebado.core.data.source.remote.response.dailyplan.DailyPlanRequest
+import com.dicoding.hanebado.core.data.source.remote.response.dailyplan.GetAllDailyResponse
+import com.dicoding.hanebado.core.data.source.remote.response.dailyplan.GetTodayResponse
+import com.dicoding.hanebado.core.data.source.remote.response.exercise.ExerciseResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -22,6 +27,7 @@ import kotlin.coroutines.cancellation.CancellationException
 @Singleton
 class RemoteDataSource @Inject constructor(private val apiService: ApiService) {
 
+    // Auth
     suspend fun login(email: String, password: String): Flow<ApiResponse<LoginResponse>> {
         return flow {
             try {
@@ -133,4 +139,75 @@ class RemoteDataSource @Inject constructor(private val apiService: ApiService) {
             }
         }
     }.flowOn(Dispatchers.IO)
+
+
+    // Daily Plan
+    suspend fun addDailyPlan(dailyPlanRequest: DailyPlanRequest): Flow<ApiResponse<AddDailyPlanResponse>> = flow {
+        try {
+            Log.d("RemoteDataSource", "Sending daily plan request: $dailyPlanRequest")
+
+            // Make the API call
+            val response = apiService.sendDailyPlan(dailyPlanRequest)
+
+            // Emit the success response
+            emit(ApiResponse.Success(response))
+            Log.d("RemoteDataSource", "Daily plan sent successfully, response: $response")
+
+        } catch (e: HttpException) {
+            // Handle HTTP errors specifically
+            Log.e("RemoteDataSource", "HTTP error when sending daily plan: ${e.code()}, ${e.message()}")
+            emit(ApiResponse.Error(e))
+
+        } catch (e: Exception) {
+            // Handle general exceptions
+            Log.e("RemoteDataSource", "Error when sending daily plan: ${e.javaClass.simpleName}, ${e.message}")
+            emit(ApiResponse.Error(e))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    suspend fun getAllDailyPlan(): Flow<ApiResponse<GetAllDailyResponse>> = flow {
+        try {
+            Log.d("RemoteDataSource", "Fetching all daily plans")
+
+            val response = apiService.getAllDailyPlan()
+            emit(ApiResponse.Success(response))
+
+            Log.d("RemoteDataSource", "Successfully fetched daily plans: ${response.data?.data?.size} items")
+
+        } catch (e: HttpException) {
+            Log.e("RemoteDataSource", "HTTP error when fetching daily plans: ${e.code()}, ${e.message()}")
+            emit(ApiResponse.Error(e))
+        } catch (e: Exception) {
+            Log.e("RemoteDataSource", "Error when fetching daily plans: ${e.javaClass.simpleName}, ${e.message}")
+            emit(ApiResponse.Error(e))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    suspend fun getTodayDailyPlan(): Flow<ApiResponse<GetTodayResponse>> = flow {
+        try {
+            Log.d("RemoteDataSource", "Fetching today's daily plan")
+            val response = apiService.getTodayDailyPlan()
+            emit(ApiResponse.Success(response))
+            Log.d("RemoteDataSource", "Successfully fetched today's plan: $response")
+        } catch (e: HttpException) {
+            Log.e("RemoteDataSource", "HTTP error when fetching today's plan: ${e.code()}, ${e.message()}")
+            emit(ApiResponse.Error(e))
+        } catch (e: Exception) {
+            Log.e("RemoteDataSource", "Error when fetching today's plan: ${e.message}")
+            emit(ApiResponse.Error(e))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    // Exercise
+    suspend fun getAllExercises(): Flow<ApiResponse<ExerciseResponse>> {
+        return flow {
+            try {
+                val response = apiService.allExercise()
+                emit(ApiResponse.Success(response))
+            } catch (e: Exception) {
+                emit(ApiResponse.Error(e))
+            }
+        }.flowOn(Dispatchers.IO)
+    }
+
 }

@@ -1,11 +1,17 @@
 package com.dicoding.hanebado.core.data.source.remote.network
 
-import com.dicoding.hanebado.core.data.source.remote.response.ActiveResponse
-import com.dicoding.hanebado.core.data.source.remote.response.LoginResponse
-import com.dicoding.hanebado.core.data.source.remote.response.OtpResponse
-import com.dicoding.hanebado.core.data.source.remote.response.RegisterResponse
-import com.dicoding.hanebado.core.data.source.remote.response.ResendOtpResponse
-import com.dicoding.hanebado.core.data.source.remote.response.UserResponse
+import com.dicoding.hanebado.core.data.source.remote.response.auth.ActiveResponse
+import com.dicoding.hanebado.core.data.source.remote.response.auth.LoginResponse
+import com.dicoding.hanebado.core.data.source.remote.response.auth.OtpResponse
+import com.dicoding.hanebado.core.data.source.remote.response.auth.RegisterResponse
+import com.dicoding.hanebado.core.data.source.remote.response.auth.ResendOtpResponse
+import com.dicoding.hanebado.core.data.source.remote.response.auth.UserResponse
+import com.dicoding.hanebado.core.data.source.remote.response.dailyplan.AddDailyPlanResponse
+import com.dicoding.hanebado.core.data.source.remote.response.dailyplan.DailyPlanRequest
+import com.dicoding.hanebado.core.data.source.remote.response.dailyplan.GetAllDailyResponse
+import com.dicoding.hanebado.core.data.source.remote.response.dailyplan.GetTodayResponse
+import com.dicoding.hanebado.core.data.source.remote.response.exercise.ExerciseResponse
+import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
@@ -16,14 +22,16 @@ interface ApiService {
 
     // Auth
     @FormUrlEncoded
-    @POST("users/login")
+//    @POST("users/login")
+    @POST("auth/login")
     suspend fun login(
         @Field("email") email: String,
         @Field("password") password: String
     ): LoginResponse
 
     @FormUrlEncoded
-    @POST("users/register")
+//    @POST("users/register")
+    @POST("auth/register")
     suspend fun register(
         @Field("name") name: String,
         @Field("email") email: String,
@@ -52,6 +60,32 @@ interface ApiService {
     suspend fun activateCheck(
         @Path("email") email: String
     ): ActiveResponse
+
+    // Daily Plan
+    @POST("/daily-plans")
+    suspend fun sendDailyPlan(
+        @Body dailyPlanRequest: DailyPlanRequest
+    ): AddDailyPlanResponse
+
+    @GET("/daily-plans/")
+    suspend fun getAllDailyPlan(
+
+    ): GetAllDailyResponse
+
+    @GET("/daily-plans/today")
+    suspend fun getTodayDailyPlan(
+
+    ): GetTodayResponse
+
+    // Exercise
+    @GET("/exercises")
+    suspend fun allExercise(
+        // Masukkan token yang didapat saat login
+    ):ExerciseResponse
+
+    // Histories
+
+    // Session
 
     ///////////////////////////////////////////////////////////////////////////////
 

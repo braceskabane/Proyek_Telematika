@@ -4,10 +4,15 @@ import android.Manifest
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -17,16 +22,22 @@ import com.dicoding.hanebado.core.utils.showLongToast
 import com.dicoding.hanebado.core.utils.showToast
 import com.dicoding.hanebado.databinding.ActivityMainBinding
 import com.dicoding.hanebado.view.dashboard.record.RecordActivity
+import com.dicoding.hanebado.view.login.LoginActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.play.core.splitinstall.SplitInstallManager
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallRequest
 import com.google.common.util.concurrent.ListenableFuture
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity(){
 
     private lateinit var binding: ActivityMainBinding
+
+    private val viewModel: MainViewModel by viewModels()
 
     private lateinit var splitInstallManager: SplitInstallManager
 
@@ -42,6 +53,8 @@ class MainActivity : AppCompatActivity(){
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        observeAuthenticationStatus()
+
         setupActionBar()
 
         setupBottomNavbar()
@@ -51,6 +64,37 @@ class MainActivity : AppCompatActivity(){
         binding.fbRecord.setOnClickListener {
             startRecordActivity()
         }
+    }
+
+
+    private fun observeAuthenticationStatus() {
+        lifecycleScope.launch {
+            // Gunakan repeatOnLifecycle untuk proper lifecycle handling
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.isAuthenticated.collect { isAuthenticated ->
+                    Log.d("MainActivity", "Auth status changed: $isAuthenticated")
+                    if (!isAuthenticated) {
+                        // Coba refresh status sebelum memutuskan untuk logout
+                        viewModel.refreshAuthStatus()
+                        // Tunggu sebentar untuk memberi waktu refresh
+                        delay(500)
+                        // Cek lagi status setelah refresh
+                        if (!viewModel.isAuthenticated.value) {
+                            Log.d("MainActivity", "Still not authenticated after refresh, redirecting to login")
+                            navigateToLogin()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun navigateToLogin() {
+        val intent = Intent(this, LoginActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        startActivity(intent)
+        finish()
     }
 
     private fun startRecordActivity() {
@@ -75,17 +119,25 @@ class MainActivity : AppCompatActivity(){
 //        setupActionBarWithNavController(navViewController, appBarConfiguration)
         navView.setupWithNavController(navViewController)
 
-        navView.setOnNavigationItemSelectedListener { item ->
+        navView.setOnNavigationItemSelectedListener launch@{ item ->
+            if (!viewModel.isAuthenticated.value) {
+                Log.d("MainActivity", "Not authenticated, preventing navigation")
+                navigateToLogin()
+                return@launch false
+            }
             when (item.itemId) {
                 R.id.homeFragment -> {
                     navViewController.navigate(R.id.homeFragment)
                 }
+
                 R.id.historyFragment -> {
                     navViewController.navigate(R.id.historyFragment)
                 }
+
                 R.id.dailyplanFragment -> {
                     navViewController.navigate(R.id.dailyplanFragment)
                 }
+
                 R.id.profileFragment -> {
                     navViewController.navigate(R.id.profileFragment)
                 }

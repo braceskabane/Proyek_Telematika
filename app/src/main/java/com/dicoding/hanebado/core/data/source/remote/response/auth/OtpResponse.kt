@@ -1,4 +1,4 @@
-package com.dicoding.hanebado.core.data.source.remote.response
+package com.dicoding.hanebado.core.data.source.remote.response.auth
 
 import com.google.gson.annotations.SerializedName
 

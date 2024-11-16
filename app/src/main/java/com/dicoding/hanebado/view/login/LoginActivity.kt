@@ -43,41 +43,44 @@ class LoginActivity : AppCompatActivity() {
         isButtonEnabled(false)
         handleEditText()
         observeLoginResult()
-        observeActivationState()
+//        observeActivationState()
     }
 
-    private fun observeActivationState() {
-        lifecycleScope.launch {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                loginViewModel.activationState.collect { result ->
-                    when (result) {
-                        is Resource.Loading -> {
-                        }
-                        is Resource.Success -> {
-                            showLoading(false)
-                            result.data?.let { data ->
-                                Log.d("LoginActivity", "Received activation data: id=${data.id}, isActivated=${data.isActivated}")
-                                if (!data.isActivated) {
-                                    navigateToOtpActivity(data.id, data.email)
-                                } else {
-                                    proceedWithLogin()
-                                }
-                            }
-                        }
-                        is Resource.Error -> {
-                            showLoading(false)
-                            isButtonEnabled(true)
-                            handleLoginError(result.message)
-                        }
-                        else -> {
-                            showLoading(false)
-                            isButtonEnabled(true)
-                        }
-                    }
-                }
-            }
-        }
-    }
+//    private fun observeActivationState() {
+//        lifecycleScope.launch {
+//            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                loginViewModel.activationState.collect { result ->
+//                    when (result) {
+//                        is Resource.Loading -> {
+//                        }
+//                        is Resource.Success -> {
+//                            showLoading(false)
+//                            result.data?.let { data ->
+//                                Log.d("LoginActivity", "Received activation data: id=${data.id}, isActivated=${data.isActivated}")
+//                                if (!data.isActivated) {
+//                                    navigateToOtpActivity(data.id, data.email)
+//                                } else {
+//                                    proceedWithLogin()
+//                                }
+//                                // Set isActivated to true to skip the activation check
+//                                Log.d("LoginActivity", "Skipping activation check, proceeding with login.")
+//                                proceedWithLogin()
+//                            }
+//                        }
+//                        is Resource.Error -> {
+//                            showLoading(false)
+//                            isButtonEnabled(true)
+//                            handleLoginError(result.message)
+//                        }
+//                        else -> {
+//                            showLoading(false)
+//                            isButtonEnabled(true)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     private fun showErrorBottomSheet(errorMessage: String) {
         val bottomSheetDialog = BottomSheetDialog(this, R.style.TransparentBottomSheetDialogTheme)
@@ -183,6 +186,8 @@ class LoginActivity : AppCompatActivity() {
                             showLoading(false)
                             isButtonEnabled(true)
                             handleSuccessfulLogin(result.data)
+                            // Tanpa Otp
+//                            proceedWithLogin()
                         }
                         is Resource.Error -> {
                             showLoading(false)
@@ -211,17 +216,20 @@ class LoginActivity : AppCompatActivity() {
         }
 
         val email = binding.edLoginEmail.text.toString()
+        val password = binding.edLoginPass.text.toString()
         Log.d("LoginActivity", "Starting activation check for email: $email")
         showLoading(true)
         isButtonEnabled(false)
-        loginViewModel.checkActivation(email)
+        // Tanpa OTP
+//        loginViewModel.checkActivation(email)
+        loginViewModel.login(email, password)
     }
 
     private fun proceedWithLogin() {
         val email = binding.edLoginEmail.text.toString()
         val password = binding.edLoginPass.text.toString()
         Log.d("LoginActivity", "Proceeding with login for email: $email")
-        loginViewModel.login(email, password)
+//        loginViewModel.login(email, password)
     }
 
     private fun handleLoginError(errorMessage: String?) {
@@ -234,7 +242,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun handleSuccessfulLogin(loginData: LoginDomain?) {
-        val token = loginData?.accessToken
+        val token = loginData?.dataDomain?.token
         if (token != null) {
             loginViewModel.saveLoginStatus(true)
             loginViewModel.saveAccessToken(token)
@@ -247,9 +255,13 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun navigateToMainActivity() {
+        // Verify token sebelum navigasi
+        loginViewModel.verifyToken()
+
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
+        finish()
     }
 
     private fun navigateToRegisterActivity() {

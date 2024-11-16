@@ -39,6 +39,7 @@
             android:layout_marginEnd="16dp"
             android:background="@drawable/custom_background_home_daily_plan">\
             <LinearLayout
+                android:id="@+id/Click_Sunday"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -56,6 +57,7 @@
                     android:textColor="@color/white" />
 
                 <ImageView
+                    android:visibility="gone"
                     style="@style/textStyleSemIBold_14"
                     android:id="@+id/ivSunday"
                     android:layout_width="14dp"
@@ -75,6 +77,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/Click_Monday"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -92,6 +95,7 @@
                     android:textColor="@color/white" />
 
                 <ImageView
+                    android:visibility="gone"
                     style="@style/textStyleSemIBold_14"
                     android:id="@+id/ivModay"
                     android:layout_width="14dp"
@@ -111,6 +115,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/Click_Tuesday"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -148,6 +153,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/Click_Wednesday"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -185,6 +191,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/Click_Thursday"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -221,6 +228,7 @@
                     app:tint="@color/dark_grey" />
             </LinearLayout>
             <LinearLayout
+                android:id="@+id/Click_Friday"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -258,6 +266,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/Click_Saturday"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -295,6 +304,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/Click_Never"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">

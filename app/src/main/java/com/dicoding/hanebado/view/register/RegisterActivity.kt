@@ -169,16 +169,19 @@ class RegisterActivity : AppCompatActivity() {
                         isButtonEnabled(true)
                         showToast(getString(R.string.register_success))
 
-                        val userId = result.data?.user?.id
-                        if (userId != null) {
-                            navigateToOtpActivity(userId, email)
-                        } else {
-                            showToast("Error: User ID not found")
-                            Log.e(
-                                "RegisterActivity",
-                                "User ID is null after successful registration"
-                            )
-                        }
+//                        val userId = result.data?.user?.id
+//                        if (userId != null) {
+//                            navigateToOtpActivity(userId, email)
+//                        } else {
+//                            showToast("Error: User ID not found")
+//                            Log.e(
+//                                "RegisterActivity",
+//                                "User ID is null after successful registration"
+//                            )
+//                        }
+
+                        // Redirect to LoginActivity instead of OTP
+                        navigateToLoginActivity()
                     }
 
                     else -> {}
