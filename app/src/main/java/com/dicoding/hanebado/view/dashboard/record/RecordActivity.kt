@@ -3,6 +3,8 @@ package com.dicoding.hanebado.view.dashboard.record
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -17,14 +19,18 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.dicoding.hanebado.R
+import com.dicoding.hanebado.core.domain.dailyplan.model.TodayExerciseDomain
 import com.dicoding.hanebado.databinding.ActivityRecordBinding
+import com.dicoding.hanebado.view.dashboard.record.dialogplan.ShowPlanDialog
 import com.dicoding.hanebado.view.dashboard.record.ml.OverlayView
 import com.dicoding.hanebado.view.dashboard.record.ml.PoseLandmarkerHelper
 import com.dicoding.hanebado.view.dashboard.record.ml.PoseLandmarkerHelper.Companion.MODEL_POSE_LANDMARKER_FULL
 import com.google.mediapipe.tasks.vision.core.RunningMode
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
+@AndroidEntryPoint
 class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListener {
     private lateinit var binding: ActivityRecordBinding
     private lateinit var poseLandmarkerHelper: PoseLandmarkerHelper
@@ -35,11 +41,26 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private var cameraProvider: ProcessCameraProvider? = null
     private var cameraFacing = CameraSelector.LENS_FACING_BACK
     private lateinit var overlayView: OverlayView
+    private var selectedExercise: TodayExerciseDomain? = null
+    private var seconds = 0
+    private var isRunning = false
+    private val handler = Handler(Looper.getMainLooper())
+    private val timerRunnable = object : Runnable {
+        override fun run() {
+            if (isRunning) {
+                seconds++
+                updateTimerUI()
+                handler.postDelayed(this, 1000) // Update setiap detik
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRecordBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        showPlanDialog()
 
         // Inisialisasi overlayView
         overlayView = findViewById(R.id.overlay_view)
@@ -61,6 +82,7 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
             )
         }
 
+
         setupPlankStatusView()
 
         if (allPermissionsGranted()) {
@@ -70,6 +92,47 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
             )
         }
+    }
+
+    private fun showPlanDialog() {
+        val dialog = ShowPlanDialog().apply {
+            exerciseSelectedListener = object : OnTodayExerciseSelectedListener {
+                override fun onExerciseSelected(exercise: TodayExerciseDomain) {
+                    selectedExercise = exercise
+                    setupExerciseUI(exercise)
+                    initializeCameraSetup()
+                }
+            }
+        }
+        dialog.show(supportFragmentManager, ShowPlanDialog.TAG)
+    }
+
+    private fun setupExerciseUI(exercise: TodayExerciseDomain) {
+        binding.apply {
+            tvExerciseName.text = exercise.exercise.name
+            tvTimer.visibility = View.VISIBLE
+            tvTimer.text = "00:00:00"
+        }
+    }
+
+    private fun startTimer() {
+        if (!isRunning) {
+            isRunning = true
+            handler.post(timerRunnable)
+        }
+    }
+
+    private fun stopTimer() {
+        isRunning = false
+        handler.removeCallbacks(timerRunnable)
+    }
+
+    private fun updateTimerUI() {
+        val hours = seconds / 3600
+        val minutes = (seconds % 3600) / 60
+        val secs = seconds % 60
+
+        binding.tvTimer.text = String.format("%02d:%02d:%02d", hours, minutes, secs)
     }
 
     override fun onResults(resultBundle: PoseLandmarkerHelper.ResultBundle) {
@@ -117,6 +180,35 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
                     else -> "Adjusting..."
                 }
             }
+        }
+    }
+
+    private fun initializeCameraSetup() {
+        // Pindahkan inisialisasi kamera dll ke sini
+        overlayView = findViewById(R.id.overlay_view)
+        backgroundExecutor = Executors.newSingleThreadExecutor()
+
+        backgroundExecutor.execute {
+            poseLandmarkerHelper = PoseLandmarkerHelper(
+                context = this,
+                runningMode = RunningMode.LIVE_STREAM,
+                minPoseDetectionConfidence = PoseLandmarkerHelper.DEFAULT_POSE_DETECTION_CONFIDENCE,
+                minPoseTrackingConfidence = PoseLandmarkerHelper.DEFAULT_POSE_TRACKING_CONFIDENCE,
+                minPosePresenceConfidence = PoseLandmarkerHelper.DEFAULT_POSE_PRESENCE_CONFIDENCE,
+                currentDelegate = PoseLandmarkerHelper.DELEGATE_CPU,
+                poseLandmarkerHelperListener = this,
+                currentModel = MODEL_POSE_LANDMARKER_FULL
+            )
+        }
+
+        setupPlankStatusView()
+
+        if (allPermissionsGranted()) {
+            startCamera()
+        } else {
+            ActivityCompat.requestPermissions(
+                this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
+            )
         }
     }
 
@@ -224,6 +316,10 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         }
     }
 
+    private fun onDoneButtonClicked() {
+        startTimer()
+    }
+
     override fun onResume() {
         super.onResume()
         // Restart pose detection if needed
@@ -236,6 +332,7 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
 
     override fun onPause() {
         super.onPause()
+        stopTimer()
         backgroundExecutor.execute {
             poseLandmarkerHelper.clearPoseLandmarker()
         }
@@ -243,7 +340,7 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
 
     override fun onDestroy() {
         super.onDestroy()
-        // Shut down background executor
+        stopTimer()
         backgroundExecutor.shutdown()
     }
 
