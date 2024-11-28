@@ -45,6 +45,8 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private var seconds = 0
     private var isRunning = false
     private val handler = Handler(Looper.getMainLooper())
+    private var isDialogShown = false
+
     private val timerRunnable = object : Runnable {
         override fun run() {
             if (isRunning) {
@@ -60,7 +62,9 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         binding = ActivityRecordBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        showPlanDialog()
+        if (!isDialogShown) {
+            showPlanDialog()
+        }
 
         // Inisialisasi overlayView
         overlayView = findViewById(R.id.overlay_view)
@@ -104,8 +108,12 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
                 }
             }
         }
+        dialog.onDismissListener = {
+            isDialogShown = true // Tandai bahwa dialog sudah ditampilkan
+        }
         dialog.show(supportFragmentManager, ShowPlanDialog.TAG)
     }
+
 
     private fun setupExerciseUI(exercise: TodayExerciseDomain) {
         binding.apply {

@@ -1,5 +1,6 @@
 package com.dicoding.hanebado.view.dashboard.record.dialogplan
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -30,8 +31,14 @@ class ShowPlanDialog : BottomSheetDialogFragment() {
     private val binding get() = _binding!!
     private val viewModel: ShowPlanViewModel by viewModels()
     private lateinit var workoutAdapter: RecordDailyWorkoutAdapter
+    var onDismissListener: (() -> Unit)? = null
 
     override fun getTheme(): Int = R.style.CustomBottomSheetDialog
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        onDismissListener?.invoke()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,6 +60,7 @@ class ShowPlanDialog : BottomSheetDialogFragment() {
             setOnReadyClickListener { exercise ->
                 // Handle click pada button Ready
                 startExercise(exercise)
+                dismiss()
             }
         }
 
@@ -64,10 +72,10 @@ class ShowPlanDialog : BottomSheetDialogFragment() {
 
     private fun startExercise(exercise: TodayExerciseDomain) {
         // Intent ke RecordActivity atau handle sesuai kebutuhan
-        dismiss()
         startActivity(Intent(requireContext(), RecordActivity::class.java).apply {
             putExtra("exerciseId", exercise.id)
         })
+        dismiss()
     }
 
     private fun observeTodayPlan() {

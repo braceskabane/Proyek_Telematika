@@ -141,6 +141,26 @@ dependencies {
     implementation(libs.tensorflow.lite.gpu)
     implementation (libs.tensorflow.lite.task.vision)
 
+    // ML Kit
+    implementation(libs.mlkit.common)
+    implementation(libs.mlkit.pose.detection)
+    implementation(libs.mlkit.pose.detection.accurate)
+    implementation(libs.mlkit.camera)
+
+    // UI Components
+    implementation(libs.recyclerview)
+    implementation(libs.recyclerview.selection)
+    implementation(libs.viewpager2)
+    implementation(libs.dotsindicator)
+    implementation(libs.curved.bottom.navigation)
+
+    // Additional Libraries
+    implementation(libs.android.gif.drawable)
+    implementation(libs.guava)
+    implementation(libs.multidex)
+    implementation(libs.uiautomator)
+    implementation(libs.odml.image)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
