@@ -10,5 +10,5 @@ import kotlinx.coroutines.flow.Flow
 interface DailyPlanUseCase {
     fun addDailyPlan(dailyPlanRequest: DailyPlanRequest): Flow<Resource<DailyPlanDomain>>
     fun getAllDailyPlan(): Flow<Resource<DailyPlanListDomain>>
-    fun getTodayDailyPlan(): Flow<Resource<TodayDailyPlanDomain>>
+    fun getTodayDailyPlan(): Flow<Resource<List<TodayDailyPlanDomain>>>
 }

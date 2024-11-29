@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@drawable/custom_background_home_daily_plan"
-    android:layout_marginTop="10dp"
+    android:backgroundTint="@color/strava"
     android:layout_marginBottom="10dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout

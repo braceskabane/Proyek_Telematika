@@ -1,7 +1,6 @@
 package com.dicoding.hanebado.view.dashboard.record.dialogplan
 
 import android.content.DialogInterface
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -19,7 +18,6 @@ import com.dicoding.hanebado.core.domain.dailyplan.model.TodayDailyPlanDomain
 import com.dicoding.hanebado.core.domain.dailyplan.model.TodayExerciseDomain
 import com.dicoding.hanebado.databinding.DialogRecordDailyWorkoutBinding
 import com.dicoding.hanebado.view.dashboard.record.OnTodayExerciseSelectedListener
-import com.dicoding.hanebado.view.dashboard.record.RecordActivity
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -30,8 +28,8 @@ class ShowPlanDialog : BottomSheetDialogFragment() {
     private var _binding: DialogRecordDailyWorkoutBinding? = null
     private val binding get() = _binding!!
     private val viewModel: ShowPlanViewModel by viewModels()
-    private lateinit var workoutAdapter: RecordDailyWorkoutAdapter
-    var onDismissListener: (() -> Unit)? = null
+    private lateinit var workoutAdapter: DailyPlanAdapter
+    private var onDismissListener: (() -> Unit)? = null
 
     override fun getTheme(): Int = R.style.CustomBottomSheetDialog
 
@@ -56,13 +54,14 @@ class ShowPlanDialog : BottomSheetDialogFragment() {
     }
 
     private fun setupRecyclerView() {
-        workoutAdapter = RecordDailyWorkoutAdapter().apply {
-            setOnReadyClickListener { exercise ->
-                // Handle click pada button Ready
-                startExercise(exercise)
-                dismiss()
+        workoutAdapter = DailyPlanAdapter(
+            onExerciseClickListener = { exercise ->
+                handleExerciseSelection(exercise)
+            },
+            onReadyClickListener = { exercise ->
+                handleExerciseSelection(exercise)
             }
-        }
+        )
 
         binding.rvStartWorkout.apply {
             adapter = workoutAdapter
@@ -70,11 +69,8 @@ class ShowPlanDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun startExercise(exercise: TodayExerciseDomain) {
-        // Intent ke RecordActivity atau handle sesuai kebutuhan
-        startActivity(Intent(requireContext(), RecordActivity::class.java).apply {
-            putExtra("exerciseId", exercise.id)
-        })
+    private fun handleExerciseSelection(exercise: TodayExerciseDomain) {
+        exerciseSelectedListener?.onExerciseSelected(exercise)
         dismiss()
     }
 
@@ -84,11 +80,13 @@ class ShowPlanDialog : BottomSheetDialogFragment() {
                 viewModel.todayPlan.collect { result ->
                     when (result) {
                         is Resource.Success -> {
-                            result.data?.let { plan ->
-                                Log.d("ShowPlanDialog", "Received plan with ${plan.exercises.size} exercises")
-                                workoutAdapter.submitList(plan.exercises)
-                                updatePlanHeader(plan)
+                            result.data?.let { planList ->
+                                Log.d("ShowPlanDialog", "Received plan with ${planList.size} daily plans")
+                                // Memperbarui header dengan daftar
+                                updatePlanHeader(planList)
+                                workoutAdapter.setDailyPlans(planList)
                             }
+
                         }
                         is Resource.Loading -> {
                         }
@@ -107,11 +105,19 @@ class ShowPlanDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun updatePlanHeader(plan: TodayDailyPlanDomain) {
+    private fun updatePlanHeader(planList: List<TodayDailyPlanDomain>) {
         binding.apply {
-            tvWorkoutLabel.text = plan.label
+            // Memeriksa apakah ada elemen dalam daftar dan mengambil elemen pertama
+            val firstPlan = planList.firstOrNull()
+            firstPlan?.let {
+                tvWorkoutLabel.text = it.label
+            } ?: run {
+                // Menangani kasus jika tidak ada data dalam daftar
+                tvWorkoutLabel.text = "No plan available"
+            }
         }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

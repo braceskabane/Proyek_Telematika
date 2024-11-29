@@ -46,6 +46,7 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private var isRunning = false
     private val handler = Handler(Looper.getMainLooper())
     private var isDialogShown = false
+    private var isExerciseSelected = false
 
     private val timerRunnable = object : Runnable {
         override fun run() {
@@ -62,17 +63,25 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         binding = ActivityRecordBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        if (!isDialogShown) {
-            showPlanDialog()
-        }
-
-        // Inisialisasi overlayView
+        // Inisialisasi awal
+        backgroundExecutor = Executors.newSingleThreadExecutor()
         overlayView = findViewById(R.id.overlay_view)
 
-        // Initialize background executor
-        backgroundExecutor = Executors.newSingleThreadExecutor()
+        // Initialize PoseLandmarkerHelper terlebih dahulu
+        initializePoseLandmarker()
 
-        // Initialize PoseLandmarkerHelper
+        val exerciseId = intent.getStringExtra("exerciseId")
+
+        if (exerciseId == null && !isExerciseSelected) {
+            // Jika tidak ada exerciseId dan belum ada exercise yang dipilih
+            showPlanDialog()
+        } else {
+            // Setup state jika ada exerciseId atau exercise sudah dipilih
+            setupInitialState()
+        }
+    }
+
+    private fun initializePoseLandmarker() {
         backgroundExecutor.execute {
             poseLandmarkerHelper = PoseLandmarkerHelper(
                 context = this,
@@ -85,8 +94,9 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
                 currentModel = MODEL_POSE_LANDMARKER_FULL
             )
         }
+    }
 
-
+    private fun setupInitialState() {
         setupPlankStatusView()
 
         if (allPermissionsGranted()) {
@@ -102,24 +112,22 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         val dialog = ShowPlanDialog().apply {
             exerciseSelectedListener = object : OnTodayExerciseSelectedListener {
                 override fun onExerciseSelected(exercise: TodayExerciseDomain) {
+                    isExerciseSelected = true // Set flag bahwa exercise sudah dipilih
                     selectedExercise = exercise
                     setupExerciseUI(exercise)
-                    initializeCameraSetup()
+                    setupInitialState() // Setup state setelah exercise dipilih
                 }
             }
         }
-        dialog.onDismissListener = {
-            isDialogShown = true // Tandai bahwa dialog sudah ditampilkan
-        }
         dialog.show(supportFragmentManager, ShowPlanDialog.TAG)
     }
-
 
     private fun setupExerciseUI(exercise: TodayExerciseDomain) {
         binding.apply {
             tvExerciseName.text = exercise.exercise.name
             tvTimer.visibility = View.VISIBLE
             tvTimer.text = "00:00:00"
+            startTimer()
         }
     }
 
@@ -265,6 +273,11 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     }
 
     private fun detectPose(imageProxy: ImageProxy) {
+        if (!::poseLandmarkerHelper.isInitialized) {
+            imageProxy.close()
+            return
+        }
+
         poseLandmarkerHelper.detectLiveStream(
             imageProxy = imageProxy,
             isFrontCamera = cameraFacing == CameraSelector.LENS_FACING_FRONT

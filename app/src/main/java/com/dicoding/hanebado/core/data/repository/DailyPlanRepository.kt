@@ -57,9 +57,9 @@ class DailyPlanRepository @Inject constructor(
         }.asFlow()
     }
 
-    override fun getTodayDailyPlan(): Flow<Resource<TodayDailyPlanDomain>> {
-        return object : NetworkBoundResource<TodayDailyPlanDomain, GetTodayResponse>() {
-            override suspend fun fetchFromApi(response: GetTodayResponse): TodayDailyPlanDomain {
+    override fun getTodayDailyPlan(): Flow<Resource<List<TodayDailyPlanDomain>>> {
+        return object : NetworkBoundResource<List<TodayDailyPlanDomain>, GetTodayResponse>() {
+            override suspend fun fetchFromApi(response: GetTodayResponse): List<TodayDailyPlanDomain> {
                 return DailyPlanMapper.mapTodayResponseToDomain(response)
             }
 

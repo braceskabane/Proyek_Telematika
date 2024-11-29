@@ -8,23 +8,33 @@ import com.dicoding.hanebado.R
 import com.dicoding.hanebado.core.domain.dailyplan.model.TodayExerciseDomain
 import com.dicoding.hanebado.databinding.ItemRecordDailyWorkoutBinding
 
-class RecordDailyWorkoutAdapter : RecyclerView.Adapter<RecordDailyWorkoutAdapter.WorkoutViewHolder>() {
+class ExerciseAdapter(
+    private val onExerciseClickListener: (TodayExerciseDomain) -> Unit,
+    private val onReadyClickListener: ((TodayExerciseDomain) -> Unit)? = null // Add this line
+) : RecyclerView.Adapter<ExerciseAdapter.ExerciseViewHolder>() {
+
     private val exercises = mutableListOf<TodayExerciseDomain>()
-    private var onReadyClickListener: ((TodayExerciseDomain) -> Unit)? = null
 
-    fun setOnReadyClickListener(listener: (TodayExerciseDomain) -> Unit) {
-        onReadyClickListener = listener
-    }
-
-    fun submitList(newExercises: List<TodayExerciseDomain>) {
+    fun setExercises(exerciseList: List<TodayExerciseDomain>) {
         exercises.clear()
-        exercises.addAll(newExercises)
+        exercises.addAll(exerciseList)
         notifyDataSetChanged()
     }
 
-    inner class WorkoutViewHolder(
-        private val binding: ItemRecordDailyWorkoutBinding
-    ) : RecyclerView.ViewHolder(binding.root) {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExerciseViewHolder {
+        val binding = ItemRecordDailyWorkoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ExerciseViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: ExerciseViewHolder, position: Int) {
+        val exercise = exercises[position]
+        holder.bind(exercise)
+    }
+
+    override fun getItemCount(): Int = exercises.size
+
+    inner class ExerciseViewHolder(private val binding: ItemRecordDailyWorkoutBinding) :
+        RecyclerView.ViewHolder(binding.root) {
 
         fun bind(exercise: TodayExerciseDomain) {
             with(binding) {
@@ -46,14 +56,14 @@ class RecordDailyWorkoutAdapter : RecyclerView.Adapter<RecordDailyWorkoutAdapter
                     )
                     setOnClickListener {
                         if (!exercise.isCompleted) {
-                            onReadyClickListener?.invoke(exercise)
+                            onReadyClickListener?.invoke(exercise) // Trigger the listener if it's not completed
                         }
                     }
                 }
 
                 // Optional: Set icon berdasarkan jenis exercise
                 circleImageView.setImageResource(
-                    when(exercise.exercise.name.lowercase()) {
+                    when (exercise.exercise.name.lowercase()) {
                         "Push-up" -> R.drawable.icon_push_up
                         "Sit-up" -> R.drawable.icon_sit_up
                         "Squat" -> R.drawable.icon_squat
@@ -66,20 +76,4 @@ class RecordDailyWorkoutAdapter : RecyclerView.Adapter<RecordDailyWorkoutAdapter
             }
         }
     }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WorkoutViewHolder {
-        return WorkoutViewHolder(
-            ItemRecordDailyWorkoutBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            )
-        )
-    }
-
-    override fun onBindViewHolder(holder: WorkoutViewHolder, position: Int) {
-        holder.bind(exercises[position])
-    }
-
-    override fun getItemCount() = exercises.size
 }

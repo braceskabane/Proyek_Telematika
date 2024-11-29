@@ -100,37 +100,41 @@ object DailyPlanMapper {
         )
     }
 
-    fun mapTodayResponseToDomain(response: GetTodayResponse): TodayDailyPlanDomain {
-        val todayData = response.data
-        return TodayDailyPlanDomain(
-            id = todayData?.id ?: 0,
-            label = todayData?.label.orEmpty(),
-            notificationTime = todayData?.notificationTime.orEmpty(),
-            repeatDays = todayData?.repeatDays?.filterNotNull() ?: emptyList(),
-            exercises = todayData?.exercises?.mapNotNull { exercise ->
-                exercise?.let {
-                    TodayExerciseDomain(
-                        id = it.id ?: 0,
-                        dailyPlanId = it.dailyPlanId ?: 0,
-                        exerciseId = it.exerciseId ?: 0,
-                        sets = it.sets ?: 0,
-                        reps = it.reps ?: 0,
-                        order = it.order ?: 0,
-                        isCompleted = it.isCompleted ?: false,
-                        exercise = TodayExerciseDetailDomain(
-                            id = it.exercise?.id ?: 0,
-                            name = it.exercise?.name.orEmpty(),
-                            description = it.exercise?.description.orEmpty(),
-                            difficultyXP = it.exercise?.difficultyXP ?: 0,
-                            createdAt = it.exercise?.createdAt.orEmpty(),
-                            updatedAt = it.exercise?.updatedAt.orEmpty()
-                        )
-                    )
-                }
-            } ?: emptyList(),
-            isActive = todayData?.isActive ?: false,
-            userId = todayData?.userId.orEmpty(),
-            createdAt = todayData?.createdAt.orEmpty()
-        )
+    fun mapTodayResponseToDomain(response: GetTodayResponse): List<TodayDailyPlanDomain> {
+        return response.data?.mapNotNull { item ->
+            item?.let {
+                TodayDailyPlanDomain(
+                    id = it.id ?: 0,
+                    label = it.label.orEmpty(),
+                    notificationTime = it.notificationTime.orEmpty(),
+                    repeatDays = it.repeatDays?.filterNotNull() ?: emptyList(),
+                    exercises = it.exercises?.mapNotNull { exerciseItem ->
+                        exerciseItem?.let { exercise ->
+                            TodayExerciseDomain(
+                                id = exercise.id ?: 0,
+                                dailyPlanId = exercise.dailyPlanId ?: 0,
+                                exerciseId = exercise.exerciseId ?: 0,
+                                sets = exercise.sets ?: 0,
+                                reps = exercise.reps ?: 0,
+                                order = exercise.order ?: 0,
+                                isCompleted = exercise.isCompleted ?: false,
+                                exercise = TodayExerciseDetailDomain(
+                                    id = exercise.exercise?.id ?: 0,
+                                    name = exercise.exercise?.name.orEmpty(),
+                                    description = exercise.exercise?.description.orEmpty(),
+                                    difficultyXP = exercise.exercise?.difficultyXP ?: 0,
+                                    createdAt = exercise.exercise?.createdAt.orEmpty(),
+                                    updatedAt = exercise.exercise?.updatedAt.orEmpty()
+                                )
+                            )
+                        }
+                    } ?: emptyList(),
+                    isActive = it.isActive ?: false,
+                    userId = it.userId.orEmpty(),
+                    createdAt = it.createdAt.orEmpty()
+                )
+            }
+        } ?: emptyList()
     }
+
 }

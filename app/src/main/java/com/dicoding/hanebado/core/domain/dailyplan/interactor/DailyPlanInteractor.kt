@@ -21,7 +21,7 @@ class DailyPlanInteractor @Inject constructor(
     override fun getAllDailyPlan(): Flow<Resource<DailyPlanListDomain>> {
         return dailyPlanRepository.getAllDailyPlan()
     }
-    override fun getTodayDailyPlan(): Flow<Resource<TodayDailyPlanDomain>> {
+    override fun getTodayDailyPlan(): Flow<Resource<List<TodayDailyPlanDomain>>> {
         return dailyPlanRepository.getTodayDailyPlan()
     }
 }

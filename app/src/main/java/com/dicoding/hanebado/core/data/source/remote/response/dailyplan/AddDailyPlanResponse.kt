@@ -53,7 +53,7 @@ data class ExercisesItem(
 	val sets: Int? = null,
 
 	@field:SerializedName("exercise")
-	val exercise: Exercise? = null,
+	val exercise: TodayExercises? = null,
 
 	@field:SerializedName("id")
 	val id: Int? = null,

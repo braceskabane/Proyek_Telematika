@@ -14,9 +14,9 @@ data class TodayDailyPlanDomain(
 data class TodayExerciseDomain(
     val id: Int,
     val dailyPlanId: Int,
-    val exerciseId: Int,
-    val sets: Int,
+    val exerciseId: Int, // Tambahkan parameter ini
     val reps: Int,
+    val sets: Int,
     val order: Int,
     val isCompleted: Boolean,
     val exercise: TodayExerciseDetailDomain

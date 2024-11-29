@@ -52,12 +52,16 @@
                 app:layout_constraintTop_toTopOf="parent" />
         </LinearLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_start_workout"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            tools:itemCount="8"
-            tools:listitem="@layout/item_record_daily_workout" />
+            android:layout_height="wrap_content">
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_start_workout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:itemCount="8"
+                tools:listitem="@layout/item_today_plan_dialog_ready" />
+        </ScrollView>
     </LinearLayout>
 
 

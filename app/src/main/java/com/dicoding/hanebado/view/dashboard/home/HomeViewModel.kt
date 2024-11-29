@@ -16,7 +16,7 @@ class HomeViewModel @Inject constructor(
     private val dailyPlanUseCase: DailyPlanUseCase
 ) : ViewModel() {
 
-    private val _todayPlan = MutableStateFlow<Resource<TodayDailyPlanDomain>>(Resource.Loading())
+    private val _todayPlan = MutableStateFlow<Resource<List<TodayDailyPlanDomain>>>(Resource.Loading())
     val todayPlan = _todayPlan.asStateFlow()
 
     init {

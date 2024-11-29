@@ -66,7 +66,7 @@ class HomeFragment : Fragment() {
                     }
                     is Resource.Success -> {
                         resource.data?.let { data ->
-                            todayPlanAdapter.submitList(listOf(data))
+                            todayPlanAdapter.submitList(data)
                         }
                     }
                     is Resource.Error -> {
