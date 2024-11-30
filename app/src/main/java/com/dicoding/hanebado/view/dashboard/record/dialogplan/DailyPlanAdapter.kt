@@ -38,7 +38,6 @@ class DailyPlanAdapter(private val onExerciseClickListener: (TodayExerciseDomain
         fun bind(plan: TodayDailyPlanDomain) {
             // Setup the nested RecyclerView for exercises
             val exerciseAdapter = ExerciseAdapter(
-                onExerciseClickListener = onExerciseClickListener,
                 onReadyClickListener = onReadyClickListener
             )
             binding.rvSportCategoryItem.layoutManager = LinearLayoutManager(binding.root.context)

@@ -10,6 +10,7 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
         maven { url = uri("https://jitpack.io") }
+        maven { url = uri("https://androidx.dev/snapshots/builds/1.0.0-SNAPSHOT/artifacts/repository/") } // Tambahan untuk SNAPSHOT
     }
 }
 dependencyResolutionManagement {
@@ -18,6 +19,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url = uri("https://jitpack.io") }
+        maven { url = uri("https://androidx.dev/snapshots/builds/1.0.0-SNAPSHOT/artifacts/repository/") } // Tambahan untuk SNAPSHOT
     }
 }
 

@@ -9,7 +9,6 @@ import com.dicoding.hanebado.core.domain.dailyplan.model.TodayExerciseDomain
 import com.dicoding.hanebado.databinding.ItemRecordDailyWorkoutBinding
 
 class ExerciseAdapter(
-    private val onExerciseClickListener: (TodayExerciseDomain) -> Unit,
     private val onReadyClickListener: ((TodayExerciseDomain) -> Unit)? = null // Add this line
 ) : RecyclerView.Adapter<ExerciseAdapter.ExerciseViewHolder>() {
 

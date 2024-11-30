@@ -3,6 +3,7 @@ package com.dicoding.hanebado.view.dashboard.record
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -16,46 +17,89 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import com.dicoding.hanebado.R
+import com.dicoding.hanebado.core.data.source.local.entity.plan.Plan
 import com.dicoding.hanebado.core.domain.dailyplan.model.TodayExerciseDomain
 import com.dicoding.hanebado.databinding.ActivityRecordBinding
 import com.dicoding.hanebado.view.dashboard.record.dialogplan.ShowPlanDialog
-import com.dicoding.hanebado.view.dashboard.record.ml.OverlayView
-import com.dicoding.hanebado.view.dashboard.record.ml.PoseLandmarkerHelper
-import com.dicoding.hanebado.view.dashboard.record.ml.PoseLandmarkerHelper.Companion.MODEL_POSE_LANDMARKER_FULL
-import com.google.mediapipe.tasks.vision.core.RunningMode
+import com.dicoding.hanebado.view.dashboard.record.graphic.GraphicOverlay
+import com.dicoding.hanebado.view.dashboard.record.preference.PreferenceUtils
+import com.dicoding.hanebado.view.dashboard.record.util.VisionImageProcessor
+import com.google.mlkit.common.MlKitException
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.Timer
+import java.util.TimerTask
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
+
 @AndroidEntryPoint
-class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListener {
+class RecordActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRecordBinding
-    private lateinit var poseLandmarkerHelper: PoseLandmarkerHelper
+    private lateinit var cameraXViewModel: CameraXViewModel
     private lateinit var backgroundExecutor: ExecutorService
-    private var preview: Preview? = null
-    private var imageAnalyzer: ImageAnalysis? = null
-    private var camera: Camera? = null
+    private var previewView: PreviewView? = null
+    private var graphicOverlay: GraphicOverlay? = null
+
     private var cameraProvider: ProcessCameraProvider? = null
-    private var cameraFacing = CameraSelector.LENS_FACING_BACK
-    private lateinit var overlayView: OverlayView
+    private var camera: Camera? = null
+    private var previewUseCase: Preview? = null
+    private var analysisUseCase: ImageAnalysis? = null
+    private var imageProcessor: VisionImageProcessor? = null
+    private var needUpdateGraphicOverlayImageSourceInfo = false
+    private var lensFacing = CameraSelector.LENS_FACING_BACK
+    private var cameraSelector: CameraSelector? = null
+
+    private var selectedModel = POSE_DETECTION
     private var selectedExercise: TodayExerciseDomain? = null
-    private var seconds = 0
-    private var isRunning = false
-    private val handler = Handler(Looper.getMainLooper())
-    private var isDialogShown = false
     private var isExerciseSelected = false
 
-    private val timerRunnable = object : Runnable {
-        override fun run() {
-            if (isRunning) {
-                seconds++
-                updateTimerUI()
-                handler.postDelayed(this, 1000) // Update setiap detik
+    private var isResting = false
+    private var restTimer: CountDownTimer? = null
+
+    // Timer variables
+    private var mRecTimer: Timer? = null
+    private var mRecSeconds = 0
+    private var mRecMinute = 0
+    private var mRecHours = 0
+    private val mMainHandler: Handler by lazy {
+        Handler(Looper.getMainLooper()) {
+            when (it.what) {
+                WHAT_START_TIMER -> {
+                    binding.tvTimer.text = calculateTime(mRecSeconds, mRecMinute, mRecHours)
+                }
+                WHAT_STOP_TIMER -> {
+                    binding.tvTimer.text = calculateTime(0, 0)
+                    binding.tvTimer.visibility = View.GONE
+                }
             }
+            true
         }
+    }
+
+    private val onlyExercise: List<String> = listOf(
+        SQUATS_CLASS,
+        PUSHUPS_CLASS,
+        LUNGES_CLASS,
+        SITUP_UP_CLASS
+    )
+
+    private fun mapExerciseNameToClass(exerciseName: String): String? {
+        return when (exerciseName) {
+            "Push-up" -> PUSHUPS_CLASS
+            "Squat" -> SQUATS_CLASS
+            "Lunges" -> LUNGES_CLASS
+            "Sit-up" -> SITUP_UP_CLASS
+            else -> null
+        }
+    }
+
+    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
+        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,59 +107,31 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         binding = ActivityRecordBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Inisialisasi awal
-        backgroundExecutor = Executors.newSingleThreadExecutor()
-        overlayView = findViewById(R.id.overlay_view)
-
-        // Initialize PoseLandmarkerHelper terlebih dahulu
-        initializePoseLandmarker()
+        initializeComponents()
+        setupObservers()
 
         val exerciseId = intent.getStringExtra("exerciseId")
-
         if (exerciseId == null && !isExerciseSelected) {
-            // Jika tidak ada exerciseId dan belum ada exercise yang dipilih
             showPlanDialog()
         } else {
-            // Setup state jika ada exerciseId atau exercise sudah dipilih
             setupInitialState()
         }
     }
 
-    private fun initializePoseLandmarker() {
-        backgroundExecutor.execute {
-            poseLandmarkerHelper = PoseLandmarkerHelper(
-                context = this,
-                runningMode = RunningMode.LIVE_STREAM,
-                minPoseDetectionConfidence = PoseLandmarkerHelper.DEFAULT_POSE_DETECTION_CONFIDENCE,
-                minPoseTrackingConfidence = PoseLandmarkerHelper.DEFAULT_POSE_TRACKING_CONFIDENCE,
-                minPosePresenceConfidence = PoseLandmarkerHelper.DEFAULT_POSE_PRESENCE_CONFIDENCE,
-                currentDelegate = PoseLandmarkerHelper.DELEGATE_CPU,
-                poseLandmarkerHelperListener = this,
-                currentModel = MODEL_POSE_LANDMARKER_FULL
-            )
-        }
-    }
+    private fun initializeComponents() {
+        cameraXViewModel = ViewModelProvider(this)[CameraXViewModel::class.java]
+        backgroundExecutor = Executors.newSingleThreadExecutor()
 
-    private fun setupInitialState() {
-        setupPlankStatusView()
-
-        if (allPermissionsGranted()) {
-            startCamera()
-        } else {
-            ActivityCompat.requestPermissions(
-                this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
-            )
-        }
+        previewView = binding.previewView
+        graphicOverlay = binding.graphicOverlay
+        cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
     }
 
     private fun showPlanDialog() {
         val dialog = ShowPlanDialog().apply {
             exerciseSelectedListener = object : OnTodayExerciseSelectedListener {
                 override fun onExerciseSelected(exercise: TodayExerciseDomain) {
-                    isExerciseSelected = true // Set flag bahwa exercise sudah dipilih
-                    selectedExercise = exercise
-                    setupExerciseUI(exercise)
-                    setupInitialState() // Setup state setelah exercise dipilih
+                    handleExerciseSelection(exercise)
                 }
             }
         }
@@ -125,198 +141,51 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private fun setupExerciseUI(exercise: TodayExerciseDomain) {
         binding.apply {
             tvExerciseName.text = exercise.exercise.name
+            tvRepsNumber.text = "0"
+            tvSetsNumber.text = "1"
+            tvWorkoutStatus.text = "Ready"
+            tvWorkoutConfidence.text = "Position yourself correctly"
+            tvWorkoutGuide.text = "Waiting for pose detection..."
+
+            // Start timer
+            startMediaTimer()
             tvTimer.visibility = View.VISIBLE
-            tvTimer.text = "00:00:00"
-            startTimer()
         }
     }
 
-    private fun startTimer() {
-        if (!isRunning) {
-            isRunning = true
-            handler.post(timerRunnable)
-        }
-    }
+    private fun setupInitialState() {
+        Log.d(TAG, "Setting up initial state")
 
-    private fun stopTimer() {
-        isRunning = false
-        handler.removeCallbacks(timerRunnable)
-    }
-
-    private fun updateTimerUI() {
-        val hours = seconds / 3600
-        val minutes = (seconds % 3600) / 60
-        val secs = seconds % 60
-
-        binding.tvTimer.text = String.format("%02d:%02d:%02d", hours, minutes, secs)
-    }
-
-    override fun onResults(resultBundle: PoseLandmarkerHelper.ResultBundle) {
-        runOnUiThread {
-            // Update overlay view dengan pose landmarks
-            overlayView.setResults(
-                resultBundle.results.first(),
-                resultBundle.inputImageHeight,
-                resultBundle.inputImageWidth,
-                RunningMode.LIVE_STREAM
-            )
-
-            // Force a redraw
-            overlayView.invalidate()
-        }
-    }
-
-
-
-    override fun onPoseResult(poseLabel: String, poseConfidence: Float) {
-        runOnUiThread {
-            binding.apply {
-                tvPlankStatus.text = poseLabel
-                tvPlankStatus.setTextColor(
-                    ContextCompat.getColor(
-                        this@RecordActivity,
-                        when (poseLabel) {
-                            "Correct" -> R.color.green
-                            "High Back" -> R.color.orange_100
-                            "Low Back" -> R.color.red_100
-                            else -> R.color.grey_navbar
-                        }
-                    )
-                )
-
-                // Tampilkan probabilitas
-                tvPlankConfidence.text = String.format("Confidence: %.1f%%", poseConfidence * 100)
-
-                // Panduan berdasarkan pose
-                tvPlankGuide.text = when (poseLabel) {
-                    "Correct" -> "Great form! Maintain this position"
-                    "High Back" -> "Lower your back"
-                    "Low Back" -> "Raise your back"
-                    "Uncertain" -> "Please position yourself correctly"
-                    else -> "Adjusting..."
-                }
-            }
-        }
-    }
-
-    private fun initializeCameraSetup() {
-        // Pindahkan inisialisasi kamera dll ke sini
-        overlayView = findViewById(R.id.overlay_view)
-        backgroundExecutor = Executors.newSingleThreadExecutor()
-
-        backgroundExecutor.execute {
-            poseLandmarkerHelper = PoseLandmarkerHelper(
-                context = this,
-                runningMode = RunningMode.LIVE_STREAM,
-                minPoseDetectionConfidence = PoseLandmarkerHelper.DEFAULT_POSE_DETECTION_CONFIDENCE,
-                minPoseTrackingConfidence = PoseLandmarkerHelper.DEFAULT_POSE_TRACKING_CONFIDENCE,
-                minPosePresenceConfidence = PoseLandmarkerHelper.DEFAULT_POSE_PRESENCE_CONFIDENCE,
-                currentDelegate = PoseLandmarkerHelper.DELEGATE_CPU,
-                poseLandmarkerHelperListener = this,
-                currentModel = MODEL_POSE_LANDMARKER_FULL
-            )
-        }
-
-        setupPlankStatusView()
-
-        if (allPermissionsGranted()) {
-            startCamera()
-        } else {
-            ActivityCompat.requestPermissions(
-                this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
-            )
-        }
-    }
-
-    private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
-
         cameraProviderFuture.addListener({
-            cameraProvider = cameraProviderFuture.get()
-
-            // Preview use case
-            preview = Preview.Builder()
-                .setTargetAspectRatio(AspectRatio.RATIO_4_3)
-                .build()
-                .also {
-                    it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
-                }
-
-            // ImageAnalysis use case
-            imageAnalyzer = ImageAnalysis.Builder()
-                .setTargetAspectRatio(AspectRatio.RATIO_4_3)
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                .build()
-                .also {
-                    it.setAnalyzer(backgroundExecutor) { image ->
-                        detectPose(image)
-                    }
-                }
-
-            val cameraSelector = CameraSelector.Builder()
-                .requireLensFacing(cameraFacing)
-                .build()
-
             try {
-                cameraProvider?.unbindAll()
-                camera = cameraProvider?.bindToLifecycle(
-                    this,
-                    cameraSelector,
-                    preview,
-                    imageAnalyzer
-                )
+                cameraProvider = cameraProviderFuture.get()
+
+                if (allPermissionsGranted()) {
+                    Log.d(TAG, "Permissions granted, binding camera cases")
+                    bindAllCameraUseCases()
+                } else {
+                    Log.d(TAG, "Requesting permissions")
+                    ActivityCompat.requestPermissions(
+                        this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
+                    )
+                }
+
+                // Start pose detection after camera is initialized
+                Handler(Looper.getMainLooper()).postDelayed({
+                    Log.d(TAG, "Starting pose detection")
+                    cameraXViewModel.triggerClassification.value = true
+                }, 1000)
+
             } catch (e: Exception) {
                 Log.e(TAG, "Use case binding failed", e)
             }
         }, ContextCompat.getMainExecutor(this))
     }
 
-    private fun detectPose(imageProxy: ImageProxy) {
-        if (!::poseLandmarkerHelper.isInitialized) {
-            imageProxy.close()
-            return
-        }
-
-        poseLandmarkerHelper.detectLiveStream(
-            imageProxy = imageProxy,
-            isFrontCamera = cameraFacing == CameraSelector.LENS_FACING_FRONT
-        )
-    }
-
-    private fun setupPlankStatusView() {
-        binding.apply {
-            statusCard.apply {
-                visibility = View.VISIBLE
-                elevation = 8f
-                radius = 16f
-            }
-            tvPlankStatus.apply {
-                visibility = View.VISIBLE
-                text = "Preparing Camera..."
-            }
-            tvPlankConfidence.apply {
-                visibility = View.VISIBLE
-                text = "Position yourself in frame"
-            }
-            tvPlankGuide.apply {
-                visibility = View.VISIBLE
-                text = "Waiting for pose detection..."
-            }
-        }
-    }
-
-    override fun onError(error: String, errorCode: Int) {
-        runOnUiThread {
-            Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
-            if (errorCode == PoseLandmarkerHelper.GPU_ERROR) {
-                // Handle GPU error if needed
-            }
-        }
-    }
-
-    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
+    private fun bindAllCameraUseCases() {
+        bindPreviewUseCase()
+        bindAnalysisUseCase(true)
     }
 
     override fun onRequestPermissionsResult(
@@ -327,47 +196,319 @@ class RecordActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted()) {
-                startCamera()
+                bindAllCameraUseCases()
             } else {
-                Toast.makeText(this,
+                Toast.makeText(
+                    this,
                     "Permissions not granted by the user.",
-                    Toast.LENGTH_SHORT).show()
+                    Toast.LENGTH_SHORT
+                ).show()
                 finish()
             }
         }
     }
 
-    private fun onDoneButtonClicked() {
-        startTimer()
+    private fun bindPreviewUseCase() {
+        if (!PreferenceUtils.isCameraLiveViewportEnabled(this)) {
+            return
+        }
+
+        if (cameraProvider == null) {
+            return
+        }
+
+        if (previewUseCase != null) {
+            cameraProvider!!.unbind(previewUseCase)
+        }
+
+        val builder = Preview.Builder()
+        val targetResolution = PreferenceUtils.getCameraXTargetResolution(this, lensFacing)
+        if (targetResolution != null) {
+            builder.setTargetResolution(targetResolution)
+        }
+
+        previewUseCase = builder.build().also {
+            it.setSurfaceProvider(previewView!!.surfaceProvider)
+        }
+
+        try {
+            cameraProvider!!.bindToLifecycle(
+                this,
+                cameraSelector!!,
+                previewUseCase
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Use case binding failed", e)
+        }
     }
 
-    override fun onResume() {
-        super.onResume()
-        // Restart pose detection if needed
-        backgroundExecutor.execute {
-            if (poseLandmarkerHelper.isClose()) {
-                poseLandmarkerHelper.setupPoseLandmarker()
+    private fun bindAnalysisUseCase(runClassification: Boolean) {
+        selectedExercise?.let { exercise ->
+            if (cameraProvider == null) {
+                Log.d(TAG, "Camera provider is null")
+                return
+            }
+
+            try {
+                // Convert exercise type to proper format
+                val exerciseName = mapExerciseNameToClass(exercise.exercise.name)
+                if (exerciseName == null) {
+                    Log.e(TAG, "Invalid exercise type: ${exercise.exercise.name}")
+                    return
+                }
+
+                imageProcessor = when (selectedModel) {
+                    POSE_DETECTION -> {
+                        val poseDetectorOptions = PreferenceUtils.getPoseDetectorOptionsForLivePreview(this)
+                        val shouldShowInFrameLikelihood = PreferenceUtils.shouldShowPoseDetectionInFrameLikelihoodLivePreview(this)
+                        val visualizeZ = PreferenceUtils.shouldPoseDetectionVisualizeZ(this)
+                        val rescaleZ = PreferenceUtils.shouldPoseDetectionRescaleZForVisualization(this)
+
+                        val plan = Plan(
+                            id = exercise.id,
+                            exercise = exercise.exercise.name,
+                            repeatCount = exercise.reps,
+                            completed = exercise.isCompleted,
+                        )
+
+                        PoseDetectorProcessor(
+                            this,
+                            poseDetectorOptions,
+                            shouldShowInFrameLikelihood,
+                            visualizeZ,
+                            rescaleZ,
+                            runClassification,
+                            true,
+                            cameraXViewModel,
+                            listOf(plan)
+                        )
+                    }
+                    else -> throw IllegalStateException("Invalid model name")
+                }
+
+                val builder = ImageAnalysis.Builder()
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+                    .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
+
+                analysisUseCase = builder.build()
+                needUpdateGraphicOverlayImageSourceInfo = true
+
+                analysisUseCase?.setAnalyzer(
+                    ContextCompat.getMainExecutor(this)
+                ) { imageProxy: ImageProxy ->
+                    if (needUpdateGraphicOverlayImageSourceInfo) {
+                        val isImageFlipped = lensFacing == CameraSelector.LENS_FACING_FRONT
+                        val rotationDegrees = imageProxy.imageInfo.rotationDegrees
+                        if (rotationDegrees == 0 || rotationDegrees == 180) {
+                            graphicOverlay!!.setImageSourceInfo(
+                                imageProxy.width,
+                                imageProxy.height,
+                                isImageFlipped
+                            )
+                        } else {
+                            graphicOverlay!!.setImageSourceInfo(
+                                imageProxy.height,
+                                imageProxy.width,
+                                isImageFlipped
+                            )
+                        }
+                        needUpdateGraphicOverlayImageSourceInfo = false
+                    }
+
+                    try {
+                        imageProcessor!!.processImageProxy(imageProxy, graphicOverlay)
+                    } catch (e: MlKitException) {
+                        Log.e(TAG, "Failed to process image. Error: " + e.localizedMessage)
+                        Toast.makeText(this, e.localizedMessage, Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                try {
+                    cameraProvider?.bindToLifecycle(
+                        this,
+                        cameraSelector!!,
+                        analysisUseCase
+                    )
+                } catch (e: Exception) {
+                    Log.e(TAG, "Use case binding failed", e)
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Error setting up image analysis", e)
+                e.printStackTrace()
             }
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        stopTimer()
-        backgroundExecutor.execute {
-            poseLandmarkerHelper.clearPoseLandmarker()
+    private fun setupObservers() {
+        cameraXViewModel.postureLiveData.observe(this) { postureResults ->
+            postureResults?.forEach { (poseName, result) ->
+                if (poseName == selectedExercise?.exercise?.name) {
+                    updateExerciseProgress(result.repetition, result.confidence)
+                }
+            }
         }
+    }
+
+    private fun updateExerciseProgress(repetition: Int, confidence: Float) {
+        selectedExercise?.let { exercise ->
+            binding.apply {
+                // Update reps
+                tvRepsNumber.text = repetition.toString()
+
+                // Check if set is complete
+                if (repetition >= exercise.reps) {
+                    val currentSet = tvSetsNumber.text.toString().toInt()
+                    if (currentSet < exercise.sets) {
+                        // Start next set
+                        tvSetsNumber.text = (currentSet + 1).toString()
+                        tvWorkoutGuide.text = "Take a 60-second rest"
+                        startRestPeriod(currentSet + 1)
+                        // You might want to add rest timer here
+                    } else {
+                        // Exercise completed
+//                        handleExerciseCompletion()
+                    }
+                }
+
+                // Update confidence UI
+                tvWorkoutConfidence.text = String.format("Confidence: %.1f%%", confidence * 100)
+                when {
+                    confidence > 0.8f -> {
+                        tvWorkoutStatus.text = "Excellent Form!"
+                        tvWorkoutStatus.setTextColor(ContextCompat.getColor(this@RecordActivity, R.color.green))
+                        tvWorkoutGuide.text = "Keep going!"
+                    }
+                    confidence > 0.6f -> {
+                        tvWorkoutStatus.text = "Good Form"
+                        tvWorkoutStatus.setTextColor(ContextCompat.getColor(this@RecordActivity, R.color.reflex))
+                        tvWorkoutGuide.text = "Try to maintain better form"
+                    }
+                    else -> {
+                        tvWorkoutStatus.text = "Incorrect Form"
+                        tvWorkoutStatus.setTextColor(ContextCompat.getColor(this@RecordActivity, R.color.red_100))
+                        tvWorkoutGuide.text = "Please correct your form"
+                    }
+                }
+            }
+        }
+    }
+
+    private fun startRestPeriod(nextSet: Int) {
+        isResting = true
+
+        // Disable pose detection during rest
+        cameraXViewModel.triggerClassification.value = false // Ubah di sini
+
+        binding.apply {
+            tvWorkoutStatus.text = "Rest Period"
+            tvWorkoutStatus.setTextColor(ContextCompat.getColor(this@RecordActivity, R.color.red_100))
+            tvWorkoutGuide.text = "Get ready for Set $nextSet"
+        }
+
+        // Start 60-second countdown
+        restTimer?.cancel()
+        restTimer = object : CountDownTimer(60000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                val secondsLeft = millisUntilFinished / 1000
+                binding.tvWorkoutGuide.text = "Rest time: ${secondsLeft}s"
+            }
+
+            override fun onFinish() {
+                isResting = false
+                binding.apply {
+                    tvSetsNumber.text = nextSet.toString()
+                    tvRepsNumber.text = "0"
+                    tvWorkoutStatus.text = "Ready"
+                    tvWorkoutGuide.text = "Start Set $nextSet"
+                }
+
+                // Re-enable pose detection
+                cameraXViewModel.triggerClassification.value = true // Ubah di sini
+            }
+        }.start()
+    }
+
+    private fun handleExerciseSelection(exercise: TodayExerciseDomain) {
+        Log.d(TAG, "Handling exercise selection: ${exercise.exercise.name}")
+        val exerciseClass = mapExerciseNameToClass(exercise.exercise.name)
+
+        if (exerciseClass != null && exerciseClass in onlyExercise) {
+            Log.d(TAG, "Valid exercise selected: $exerciseClass")
+            isExerciseSelected = true
+            selectedExercise = exercise
+            setupExerciseUI(exercise)
+            setupInitialState()
+        } else {
+            Log.d(TAG, "Invalid exercise: ${exercise.exercise.name}")
+            Toast.makeText(
+                this,
+                "Sorry, ${exercise.exercise.name} exercise cannot be detected yet",
+                Toast.LENGTH_LONG
+            ).show()
+            finish()
+        }
+    }
+
+    private fun startMediaTimer() {
+        val pushTask: TimerTask = object : TimerTask() {
+            override fun run() {
+                mRecSeconds++
+                if (mRecSeconds >= 60) {
+                    mRecSeconds = 0
+                    mRecMinute++
+                }
+                if (mRecMinute >= 60) {
+                    mRecMinute = 0
+                    mRecHours++
+                }
+                mMainHandler.sendEmptyMessage(WHAT_START_TIMER)
+            }
+        }
+        mRecTimer?.cancel()
+        mRecTimer = Timer()
+        mRecTimer?.schedule(pushTask, 1000, 1000)
+    }
+
+    private fun stopMediaTimer() {
+        mRecTimer?.cancel()
+        mRecTimer = null
+        mRecHours = 0
+        mRecMinute = 0
+        mRecSeconds = 0
+        mMainHandler.sendEmptyMessage(WHAT_STOP_TIMER)
+    }
+
+    private fun calculateTime(seconds: Int, minute: Int, hour: Int = 0): String {
+        return String.format("%02d:%02d:%02d", hour, minute, seconds)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        stopTimer()
+        stopMediaTimer()
+        restTimer?.cancel()
         backgroundExecutor.shutdown()
+        if (imageProcessor != null) {
+            imageProcessor?.stop()
+        }
     }
 
     companion object {
         private const val TAG = "RecordActivity"
+        private const val POSE_DETECTION = "Pose Detection"
         private const val REQUEST_CODE_PERMISSIONS = 10
+        private const val WHAT_START_TIMER = 0x00
+        private const val WHAT_STOP_TIMER = 0x01
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
+
+        // Exercise class constants from PoseClassifierProcessor
+        private const val PUSHUPS_CLASS = "pushups_down"
+        private const val SQUATS_CLASS = "squats"
+        private const val LUNGES_CLASS = "lunges"
+        private const val SITUP_UP_CLASS = "situp_up"
+        private const val CHEST_PRESS_CLASS = "chestpress_down"
+        private const val DEAD_LIFT_CLASS = "deadlift_down"
+        private const val SHOULDER_PRESS_CLASS = "shoulderpress_down"
     }
 }

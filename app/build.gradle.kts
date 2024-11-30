@@ -21,8 +21,8 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-//        buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080\"")
-        buildConfigField("String", "BASE_URL", "\"http://172.20.10.3:8080\"")
+        buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080\"")
+//        buildConfigField("String", "BASE_URL", "\"http://172.20.10.3:8080\"")
 //        buildConfigField("String", "BASE_URL", "\"http://192.168.69.201:8080\"")
 //        buildConfigField("String", "BASE_URL", "\"http://192.168.30.49:8080\"")
 
@@ -146,6 +146,16 @@ dependencies {
     implementation(libs.mlkit.pose.detection)
     implementation(libs.mlkit.pose.detection.accurate)
     implementation(libs.mlkit.camera)
+    implementation(libs.mlkit.vision.common)
+    implementation(libs.mlkit.image.labeling)
+//    implementation(libs.mlkit.face.detection)
+
+    // CameraX
+    implementation (libs.camerax.camera2)
+    implementation (libs.camerax.lifecycle)
+    implementation (libs.camerax.view)
+    implementation (libs.odml.image)
+    implementation (libs.camerax.extensions)
 
     // UI Components
     implementation(libs.recyclerview)

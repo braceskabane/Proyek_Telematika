@@ -34,15 +34,12 @@ circleimageview = "3.1.0"
 cameraCore = "1.3.4"
 cameraLifecycle = "1.3.4"
 cameraView = "1.3.4"
-camerax = "1.3.4"
+camerax = "1.2.0-alpha01"
 mediapipe = "0.20230731"
 tensorflowLiteSupport = "0.4.4"
 tensorflowLiteMetadata = "0.4.4"
 tensorflow = "2.14.0"
 tensorflow-support = "0.4.4"
-mlkit-pose = "18.0.0-beta3"
-mlkit-common = "18.9.0"
-mlkit-camera = "16.0.0-beta3"
 recyclerview = "1.3.2"
 recyclerview-selection = "1.1.0"
 viewpager2 = "1.0.0"
@@ -53,6 +50,12 @@ guava = "27.1-android"
 multidex = "2.0.1"
 uiautomator = "2.2.0"
 odml = "1.0.0-beta1"
+mlkit-common = "18.10.0"
+mlkit-pose = "18.0.0-beta3"
+mlkit-camera = "16.0.0-beta3"
+mlkit-vision = "17.0.3"
+mlkit-image-labeling = "17.0.7"
+mlkit-face-detection = "16.0.8"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -115,6 +118,15 @@ mlkit-common = { group = "com.google.mlkit", name = "common", version.ref = "mlk
 mlkit-pose-detection = { group = "com.google.mlkit", name = "pose-detection", version.ref = "mlkit-pose" }
 mlkit-pose-detection-accurate = { group = "com.google.mlkit", name = "pose-detection-accurate", version.ref = "mlkit-pose" }
 mlkit-camera = { group = "com.google.mlkit", name = "camera", version.ref = "mlkit-camera" }
+mlkit-vision-common = { group = "com.google.mlkit", name = "vision-common", version.ref = "mlkit-vision" }
+mlkit-image-labeling = { group = "com.google.mlkit", name = "image-labeling", version.ref = "mlkit-image-labeling" }
+mlkit-face-detection = { group = "com.google.mlkit", name = "face-detection", version.ref = "mlkit-face-detection" }
+
+# CameraX
+camerax-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
+camerax-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
+camerax-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
+camerax-extensions = { group = "androidx.camera", name = "camera-extensions", version.ref = "camerax" }
 
 # UI components
 recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
