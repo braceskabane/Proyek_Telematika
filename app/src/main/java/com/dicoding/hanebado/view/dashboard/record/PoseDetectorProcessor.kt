@@ -46,7 +46,13 @@ class PoseDetectorProcessor(
         init {
             // update live data value
             if (classificationResult.isNotEmpty()) {
+                Log.d(TAG, "Updating posture results: $classificationResult")
                 cameraXViewModel?.postureLiveData?.postValue(classificationResult)
+
+                // Log setiap PostureResult secara detail
+                classificationResult.forEach { (poseName, result) ->
+                    Log.d(TAG, "Pose: $poseName - Reps: ${result.repetition}, Confidence: ${result.confidence}")
+                }
             }
         }
     }
@@ -74,6 +80,7 @@ class PoseDetectorProcessor(
                 var classificationResult: Map<String, PostureResult> = HashMap()
                 if (runClassification) {
                     if (poseClassifierProcessor == null) {
+                        Log.d(TAG, "Creating new PoseClassifierProcessor with exercises: $exercisesToDetect")
                         poseClassifierProcessor =
                             PoseClassifierProcessor(
                                 context,
@@ -106,6 +113,7 @@ class PoseDetectorProcessor(
                             )
                     }
                     classificationResult = poseClassifierProcessor!!.getPoseResult(pose)
+                    Log.d(TAG, "Classification Result: $classificationResult") // Tambahkan log ini
                 }
                 PoseWithClassification(pose, classificationResult)
             }
@@ -115,19 +123,25 @@ class PoseDetectorProcessor(
         poseWithClassification: PoseWithClassification,
         graphicOverlay: GraphicOverlay
     ) {
-        graphicOverlay.add(
-            PoseGraphic(
-                graphicOverlay,
-                poseWithClassification.pose,
-                showInFrameLikelihood,
-                visualizeZ,
-                rescaleZForVisualization
+        try {
+            graphicOverlay.add(
+                PoseGraphic(
+                    graphicOverlay,
+                    poseWithClassification.pose,
+                    showInFrameLikelihood,
+                    visualizeZ,
+                    rescaleZForVisualization
+                )
             )
-        )
+            Log.d(TAG, "Successfully added pose graphic to overlay")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error adding pose graphic", e)
+        }
     }
 
     override fun onFailure(e: Exception) {
         Log.e(TAG, "Pose detection failed!", e)
+        e.printStackTrace()
     }
 
     override fun isMlImageEnabled(context: Context?): Boolean {

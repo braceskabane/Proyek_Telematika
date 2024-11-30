@@ -82,19 +82,28 @@ class RecordActivity : AppCompatActivity() {
     }
 
     private val onlyExercise: List<String> = listOf(
-        SQUATS_CLASS,
-        PUSHUPS_CLASS,
-        LUNGES_CLASS,
-        SITUP_UP_CLASS
+        PUSHUPS_CLASS,      // pushups_down
+        SQUATS_CLASS,       // squats
+        LUNGES_CLASS,       // lunges
+        SITUP_UP_CLASS,     // situp_up
+        CHEST_PRESS_CLASS,  // chestpress_down
+        DEAD_LIFT_CLASS,    // deadlift_down
+        SHOULDER_PRESS_CLASS // shoulderpress_down
     )
 
     private fun mapExerciseNameToClass(exerciseName: String): String? {
+        Log.d(TAG, "Mapping exercise name: $exerciseName")
         return when (exerciseName) {
             "Push-up" -> PUSHUPS_CLASS
             "Squat" -> SQUATS_CLASS
             "Lunges" -> LUNGES_CLASS
             "Sit-up" -> SITUP_UP_CLASS
+            "Chest press" -> CHEST_PRESS_CLASS    // chestpress_down
+            "Dead lift" -> DEAD_LIFT_CLASS       // deadlift_down
+            "Shoulder press" -> SHOULDER_PRESS_CLASS // shoulderpress_down
             else -> null
+        }.also {
+            Log.d(TAG, "Mapped exercise '$exerciseName' to class name: $it")
         }
     }
 
@@ -111,6 +120,8 @@ class RecordActivity : AppCompatActivity() {
         setupObservers()
 
         val exerciseId = intent.getStringExtra("exerciseId")
+        Log.d(TAG, "Received exerciseId: $exerciseId")
+
         if (exerciseId == null && !isExerciseSelected) {
             showPlanDialog()
         } else {
@@ -156,31 +167,56 @@ class RecordActivity : AppCompatActivity() {
     private fun setupInitialState() {
         Log.d(TAG, "Setting up initial state")
 
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
-        cameraProviderFuture.addListener({
-            try {
-                cameraProvider = cameraProviderFuture.get()
+        // Check if exercise is supported first
+        selectedExercise?.let { exercise ->
+            val supportedExercises = listOf("Push-up", "Squat", "Sit-up", "Lunges")
 
-                if (allPermissionsGranted()) {
-                    Log.d(TAG, "Permissions granted, binding camera cases")
-                    bindAllCameraUseCases()
-                } else {
-                    Log.d(TAG, "Requesting permissions")
-                    ActivityCompat.requestPermissions(
-                        this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
-                    )
-                }
-
-                // Start pose detection after camera is initialized
-                Handler(Looper.getMainLooper()).postDelayed({
-                    Log.d(TAG, "Starting pose detection")
-                    cameraXViewModel.triggerClassification.value = true
-                }, 1000)
-
-            } catch (e: Exception) {
-                Log.e(TAG, "Use case binding failed", e)
+            if (!supportedExercises.contains(exercise.exercise.name)) {
+                Toast.makeText(
+                    this,
+                    "Sorry, ${exercise.exercise.name} detection is not available yet",
+                    Toast.LENGTH_LONG
+                ).show()
+                finish()
+                return
             }
-        }, ContextCompat.getMainExecutor(this))
+
+            Log.d(TAG, "Starting supported exercise: ${exercise.exercise.name}")
+
+            val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+            cameraProviderFuture.addListener({
+                try {
+                    cameraProvider = cameraProviderFuture.get()
+
+                    if (allPermissionsGranted()) {
+                        Log.d(TAG, "Permissions granted, binding camera cases")
+                        bindAllCameraUseCases()
+                    } else {
+                        Log.d(TAG, "Requesting permissions")
+                        ActivityCompat.requestPermissions(
+                            this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
+                        )
+                    }
+
+                    // Start pose detection after camera is initialized
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        Log.d(TAG, "Starting pose detection for ${exercise.exercise.name}")
+                        cameraXViewModel.triggerClassification.value = true
+                    }, 1000)
+
+                } catch (e: Exception) {
+                    Log.e(TAG, "Use case binding failed", e)
+                }
+            }, ContextCompat.getMainExecutor(this))
+        } ?: run {
+            Log.e(TAG, "No exercise selected")
+            Toast.makeText(
+                this,
+                "No exercise selected",
+                Toast.LENGTH_SHORT
+            ).show()
+            finish()
+        }
     }
 
     private fun bindAllCameraUseCases() {
@@ -272,15 +308,15 @@ class RecordActivity : AppCompatActivity() {
                         )
 
                         PoseDetectorProcessor(
-                            this,
-                            poseDetectorOptions,
-                            shouldShowInFrameLikelihood,
-                            visualizeZ,
-                            rescaleZ,
-                            runClassification,
-                            true,
-                            cameraXViewModel,
-                            listOf(plan)
+                            context = this,
+                            options = poseDetectorOptions,
+                            showInFrameLikelihood = shouldShowInFrameLikelihood,
+                            visualizeZ = visualizeZ,
+                            rescaleZForVisualization = rescaleZ,
+                            runClassification = runClassification,
+                            isStreamMode = true,
+                            cameraXViewModel = cameraXViewModel,
+                            notCompletedExercise = listOf(plan)
                         )
                     }
                     else -> throw IllegalStateException("Invalid model name")
@@ -323,17 +359,11 @@ class RecordActivity : AppCompatActivity() {
                         Toast.makeText(this, e.localizedMessage, Toast.LENGTH_SHORT).show()
                     }
                 }
-
-                try {
-                    cameraProvider?.bindToLifecycle(
-                        this,
-                        cameraSelector!!,
-                        analysisUseCase
-                    )
-                } catch (e: Exception) {
-                    Log.e(TAG, "Use case binding failed", e)
-                }
-
+                cameraProvider?.bindToLifecycle(
+                    this,
+                    cameraSelector!!,
+                    analysisUseCase
+                )
             } catch (e: Exception) {
                 Log.e(TAG, "Error setting up image analysis", e)
                 e.printStackTrace()
@@ -343,52 +373,44 @@ class RecordActivity : AppCompatActivity() {
 
     private fun setupObservers() {
         cameraXViewModel.postureLiveData.observe(this) { postureResults ->
-            postureResults?.forEach { (poseName, result) ->
-                if (poseName == selectedExercise?.exercise?.name) {
-                    updateExerciseProgress(result.repetition, result.confidence)
+            Log.d(TAG, "Received posture results: $postureResults")
+
+            selectedExercise?.let { exercise ->
+                val exerciseClass = when(exercise.exercise.name) {
+                    "Push-up" -> "pushups_down"
+                    "Squat" -> "squats"
+                    "Lunges" -> "lunges"
+                    "Sit-up" -> "situp_up"
+                    else -> null
                 }
-            }
-        }
-    }
+                Log.d(TAG, "Looking for exercise: ${exercise.exercise.name} (class: $exerciseClass)")
 
-    private fun updateExerciseProgress(repetition: Int, confidence: Float) {
-        selectedExercise?.let { exercise ->
-            binding.apply {
-                // Update reps
-                tvRepsNumber.text = repetition.toString()
+                if (exerciseClass != null) {
+                    postureResults[exerciseClass]?.let { result ->
+                        Log.d(TAG, "Found result for $exerciseClass: $result")
+                        binding.apply {
+                            tvRepsNumber.text = result.repetition.toString()
+                            tvWorkoutConfidence.text = String.format("Confidence: %.1f%%", result.confidence * 100)
 
-                // Check if set is complete
-                if (repetition >= exercise.reps) {
-                    val currentSet = tvSetsNumber.text.toString().toInt()
-                    if (currentSet < exercise.sets) {
-                        // Start next set
-                        tvSetsNumber.text = (currentSet + 1).toString()
-                        tvWorkoutGuide.text = "Take a 60-second rest"
-                        startRestPeriod(currentSet + 1)
-                        // You might want to add rest timer here
-                    } else {
-                        // Exercise completed
-//                        handleExerciseCompletion()
-                    }
-                }
-
-                // Update confidence UI
-                tvWorkoutConfidence.text = String.format("Confidence: %.1f%%", confidence * 100)
-                when {
-                    confidence > 0.8f -> {
-                        tvWorkoutStatus.text = "Excellent Form!"
-                        tvWorkoutStatus.setTextColor(ContextCompat.getColor(this@RecordActivity, R.color.green))
-                        tvWorkoutGuide.text = "Keep going!"
-                    }
-                    confidence > 0.6f -> {
-                        tvWorkoutStatus.text = "Good Form"
-                        tvWorkoutStatus.setTextColor(ContextCompat.getColor(this@RecordActivity, R.color.reflex))
-                        tvWorkoutGuide.text = "Try to maintain better form"
-                    }
-                    else -> {
-                        tvWorkoutStatus.text = "Incorrect Form"
-                        tvWorkoutStatus.setTextColor(ContextCompat.getColor(this@RecordActivity, R.color.red_100))
-                        tvWorkoutGuide.text = "Please correct your form"
+                            // Update status based on confidence
+                            when {
+                                result.confidence > 0.8f -> {
+                                    tvWorkoutStatus.text = "Excellent Form!"
+                                    tvWorkoutStatus.setTextColor(ContextCompat.getColor(this@RecordActivity, R.color.green))
+                                    tvWorkoutGuide.text = "Keep going!"
+                                }
+                                result.confidence > 0.6f -> {
+                                    tvWorkoutStatus.text = "Good Form"
+                                    tvWorkoutStatus.setTextColor(ContextCompat.getColor(this@RecordActivity, R.color.reflex))
+                                    tvWorkoutGuide.text = "Try to maintain better form"
+                                }
+                                else -> {
+                                    tvWorkoutStatus.text = "Incorrect Form"
+                                    tvWorkoutStatus.setTextColor(ContextCompat.getColor(this@RecordActivity, R.color.red_100))
+                                    tvWorkoutGuide.text = "Please correct your form"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -399,35 +421,42 @@ class RecordActivity : AppCompatActivity() {
         isResting = true
 
         // Disable pose detection during rest
-        cameraXViewModel.triggerClassification.value = false // Ubah di sini
+        cameraXViewModel.triggerClassification.value = false
 
         binding.apply {
             tvWorkoutStatus.text = "Rest Period"
-            tvWorkoutStatus.setTextColor(ContextCompat.getColor(this@RecordActivity, R.color.red_100))
-            tvWorkoutGuide.text = "Get ready for Set $nextSet"
-        }
+            tvWorkoutGuide.text = "Take a 60-second rest"
 
-        // Start 60-second countdown
-        restTimer?.cancel()
-        restTimer = object : CountDownTimer(60000, 1000) {
-            override fun onTick(millisUntilFinished: Long) {
-                val secondsLeft = millisUntilFinished / 1000
-                binding.tvWorkoutGuide.text = "Rest time: ${secondsLeft}s"
-            }
+            // Start rest timer
+            object : CountDownTimer(60000, 1000) {
+                override fun onTick(millisUntilFinished: Long) {
+                    tvWorkoutGuide.text = "Rest time: ${millisUntilFinished / 1000}s"
+                }
 
-            override fun onFinish() {
-                isResting = false
-                binding.apply {
+                override fun onFinish() {
+                    // Reset for next set
                     tvSetsNumber.text = nextSet.toString()
                     tvRepsNumber.text = "0"
                     tvWorkoutStatus.text = "Ready"
                     tvWorkoutGuide.text = "Start Set $nextSet"
-                }
 
-                // Re-enable pose detection
-                cameraXViewModel.triggerClassification.value = true // Ubah di sini
-            }
-        }.start()
+                    // Re-enable pose detection
+                    isResting = false
+                    cameraXViewModel.triggerClassification.value = true
+                }
+            }.start()
+        }
+    }
+
+    private fun handleExerciseCompletion() {
+        binding.apply {
+            tvWorkoutStatus.text = "Exercise Complete!"
+            tvWorkoutGuide.text = "Great job!"
+        }
+        // Stop pose detection
+        cameraXViewModel.triggerClassification.value = false
+
+        // Tambahkan logika untuk menyimpan hasil exercise jika diperlukan
     }
 
     private fun handleExerciseSelection(exercise: TodayExerciseDomain) {

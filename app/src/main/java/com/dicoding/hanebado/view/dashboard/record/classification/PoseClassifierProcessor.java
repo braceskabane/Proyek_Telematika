@@ -152,38 +152,26 @@ public class PoseClassifierProcessor {
 
         if (exercises != null) {
             for (String exercise : exercises) {
+                Log.d(TAG, "Mapping exercise: " + exercise);
+                // Hanya load file yang tersedia
                 switch (exercise) {
-                    case "Squat" -> {
+                    case "Push-up":
+                        addUniqueFile(files, uniqueFileNames, PUSH_UP_FILE);
+                        break;
+                    case "Squat":
                         addUniqueFile(files, uniqueFileNames, SQUAT_FILE);
-                        addUniqueFile(files, uniqueFileNames, NEUTRAL_STANDING_FILE);
+                        break;
+                    case "Lunges":
                         addUniqueFile(files, uniqueFileNames, LUNGE_FILE);
-                    }
-                    case "Push up" -> addUniqueFile(files, uniqueFileNames, PUSH_UP_FILE);
-                    case "Sit up" -> addUniqueFile(files, uniqueFileNames, SIT_UP_FILE);
-                    case "Lunge" -> {
-                        addUniqueFile(files, uniqueFileNames, LUNGE_FILE);
-                        addUniqueFile(files, uniqueFileNames, NEUTRAL_STANDING_FILE);
-                        addUniqueFile(files, uniqueFileNames, SQUAT_FILE);
-                    }
-                    case "Chest press" -> addUniqueFile(files, uniqueFileNames, CHEST_PRESS_FILE);
-                    case "Dead lift" -> addUniqueFile(files, uniqueFileNames, DEAD_LIFT_FILE);
-                    case "Shoulder press" ->
-                            addUniqueFile(files, uniqueFileNames, SHOULDER_PRESS_FILE);
-
-                    // Add more cases for other exercises if needed
-                    default -> {
-                    }
+                        break;
+                    case "Sit-up":
+                        addUniqueFile(files, uniqueFileNames, SIT_UP_FILE);
+                        break;
                 }
             }
         }
 
-        // Exercise by Default
-        addUniqueFile(files, uniqueFileNames, LUNGE_FILE);
-        addUniqueFile(files, uniqueFileNames, NEUTRAL_STANDING_FILE);
-        addUniqueFile(files, uniqueFileNames, SQUAT_FILE);
-        files.add(WARRIOR_YOGA_FILE);
-        files.add(TREE_YOGA_FILE);
-
+        Log.d(TAG, "Files to be loaded: " + files);
         return files;
     }
 

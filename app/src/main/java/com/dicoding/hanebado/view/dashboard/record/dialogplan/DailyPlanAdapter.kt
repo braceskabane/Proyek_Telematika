@@ -40,6 +40,7 @@ class DailyPlanAdapter(private val onExerciseClickListener: (TodayExerciseDomain
             val exerciseAdapter = ExerciseAdapter(
                 onReadyClickListener = onReadyClickListener
             )
+            binding.tvLabelWorkout.text = plan.label
             binding.rvSportCategoryItem.layoutManager = LinearLayoutManager(binding.root.context)
             binding.rvSportCategoryItem.adapter = exerciseAdapter
             exerciseAdapter.setExercises(plan.exercises)
