@@ -26,6 +26,7 @@ import com.dicoding.hanebado.core.data.source.local.entity.plan.Plan
 import com.dicoding.hanebado.core.domain.dailyplan.model.TodayExerciseDomain
 import com.dicoding.hanebado.databinding.ActivityRecordBinding
 import com.dicoding.hanebado.view.dashboard.record.dialogplan.ShowPlanDialog
+import com.dicoding.hanebado.view.dashboard.record.dialogrest.RestDialog
 import com.dicoding.hanebado.view.dashboard.record.graphic.GraphicOverlay
 import com.dicoding.hanebado.view.dashboard.record.preference.PreferenceUtils
 import com.dicoding.hanebado.view.dashboard.record.util.VisionImageProcessor
@@ -60,6 +61,7 @@ class RecordActivity : AppCompatActivity() {
 
     private var isResting = false
     private var restTimer: CountDownTimer? = null
+
 
     // Timer variables
     private var mRecTimer: Timer? = null
@@ -152,6 +154,7 @@ class RecordActivity : AppCompatActivity() {
     private fun setupExerciseUI(exercise: TodayExerciseDomain) {
         binding.apply {
             tvExerciseName.text = exercise.exercise.name
+            exercise.reps
             tvRepsNumber.text = "0"
             tvSetsNumber.text = "1"
             tvWorkoutStatus.text = "Ready"
@@ -392,6 +395,32 @@ class RecordActivity : AppCompatActivity() {
                             tvRepsNumber.text = result.repetition.toString()
                             tvWorkoutConfidence.text = String.format("Confidence: %.1f%%", result.confidence * 100)
 
+                            if (result.repetition == exercise.reps) {
+                                // Disable pose detection sementara
+                                cameraXViewModel.triggerClassification.value = false
+
+                                val currentSet = tvSetsNumber.text.toString().toInt()
+
+                                if (currentSet == exercise.sets) {
+                                    // Exercise selesai karena set sudah terpenuhi
+
+                                    // TODO: Kirim data hasil exercise ke ViewModel
+                                    // Rekomendasi: Buat fungsi di ViewModel seperti
+                                    // fun saveExerciseResult(
+                                    //     exerciseName: String,
+                                    //     totalSets: Int,
+                                    //     totalReps: Int,
+                                    //     duration: String
+                                    // )
+
+                                    // Reset UI dan tampilkan dialog exercise berikutnya
+                                    showPlanDialog()
+                                } else {
+                                    // Masih ada set berikutnya, tampilkan dialog rest
+                                    showRestDialog(currentSet + 1)
+                                }
+                            }
+
                             // Update status based on confidence
                             when {
                                 result.confidence > 0.8f -> {
@@ -417,35 +446,29 @@ class RecordActivity : AppCompatActivity() {
         }
     }
 
-    private fun startRestPeriod(nextSet: Int) {
-        isResting = true
+    // Tambahkan fungsi untuk menampilkan dialog rest
+    private fun showRestDialog(nextSet: Int) {
+        val dialog = RestDialog(
+            nextSet = nextSet,
+            onContinueClicked = {
+                // Resume main timer
+                startMediaTimer()
 
-        // Disable pose detection during rest
-        cameraXViewModel.triggerClassification.value = false
+                // Increment and update set number
+                binding.tvSetsNumber.text = nextSet.toString()
 
-        binding.apply {
-            tvWorkoutStatus.text = "Rest Period"
-            tvWorkoutGuide.text = "Take a 60-second rest"
+                // Reset reps counter
+                binding.tvRepsNumber.text = "0"
 
-            // Start rest timer
-            object : CountDownTimer(60000, 1000) {
-                override fun onTick(millisUntilFinished: Long) {
-                    tvWorkoutGuide.text = "Rest time: ${millisUntilFinished / 1000}s"
-                }
+                // Re-enable pose detection
+                cameraXViewModel.triggerClassification.value = true
+            }
+        )
 
-                override fun onFinish() {
-                    // Reset for next set
-                    tvSetsNumber.text = nextSet.toString()
-                    tvRepsNumber.text = "0"
-                    tvWorkoutStatus.text = "Ready"
-                    tvWorkoutGuide.text = "Start Set $nextSet"
+        // Pause main timer
+        mRecTimer?.cancel()
 
-                    // Re-enable pose detection
-                    isResting = false
-                    cameraXViewModel.triggerClassification.value = true
-                }
-            }.start()
-        }
+        dialog.show(supportFragmentManager, RestDialog.TAG)
     }
 
     private fun handleExerciseCompletion() {

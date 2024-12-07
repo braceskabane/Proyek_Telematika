@@ -1,7 +1,5 @@
 package com.dicoding.hanebado.core.domain.dailyplan.model
 
-import com.dicoding.hanebado.core.data.source.remote.response.dailyplan.Exercise
-
 data class DailyPlanDomain(
     val id: Int,
     val label: String,

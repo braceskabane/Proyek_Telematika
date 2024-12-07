@@ -55,7 +55,6 @@ class AddWorkoutViewModel @Inject constructor(
 
                 dailyPlanUseCase.addDailyPlan(
                     DailyPlanRequest(
-                        notificationTime = "2024-11-11T06:00:00Z",
                         repeatDays = selectedDays,
                         label = label,
                         exercises = selectedExercises.map { exercise ->

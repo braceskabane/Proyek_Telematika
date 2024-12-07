@@ -52,17 +52,15 @@
                 app:layout_constraintTop_toTopOf="parent" />
         </LinearLayout>
 
-        <ScrollView
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_start_workout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:itemCount="8"
+                tools:itemCount="10"
                 tools:listitem="@layout/item_today_plan_dialog_ready" />
-        </ScrollView>
+        </androidx.core.widget.NestedScrollView>
     </LinearLayout>
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

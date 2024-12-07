@@ -160,9 +160,13 @@ public class PoseClassifierProcessor {
                         break;
                     case "Squat":
                         addUniqueFile(files, uniqueFileNames, SQUAT_FILE);
+                        addUniqueFile(files, uniqueFileNames, NEUTRAL_STANDING_FILE);
+                        addUniqueFile(files, uniqueFileNames, LUNGE_FILE);
                         break;
                     case "Lunges":
                         addUniqueFile(files, uniqueFileNames, LUNGE_FILE);
+                        addUniqueFile(files, uniqueFileNames, NEUTRAL_STANDING_FILE);
+                        addUniqueFile(files, uniqueFileNames, SQUAT_FILE);
                         break;
                     case "Sit-up":
                         addUniqueFile(files, uniqueFileNames, SIT_UP_FILE);

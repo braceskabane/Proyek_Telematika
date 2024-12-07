@@ -50,7 +50,7 @@ class ExerciseAdapter(
                     setBackgroundColor(
                         ContextCompat.getColor(
                             context,
-                            if (exercise.isCompleted) R.color.grey else R.color.red
+                            if (exercise.isCompleted) R.color.anticipation else R.color.red
                         )
                     )
                     setOnClickListener {
