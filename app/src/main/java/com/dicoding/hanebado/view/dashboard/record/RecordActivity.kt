@@ -59,9 +59,11 @@ class RecordActivity : AppCompatActivity() {
     private var selectedExercise: TodayExerciseDomain? = null
     private var isExerciseSelected = false
 
-    private var isResting = false
     private var restTimer: CountDownTimer? = null
 
+    private var isRestDialogShowing = false
+    private var isWorkoutInProgress = false
+    private var currentSetNumber = 1
 
     // Timer variables
     private var mRecTimer: Timer? = null
@@ -84,13 +86,13 @@ class RecordActivity : AppCompatActivity() {
     }
 
     private val onlyExercise: List<String> = listOf(
-        PUSHUPS_CLASS,      // pushups_down
-        SQUATS_CLASS,       // squats
-        LUNGES_CLASS,       // lunges
-        SITUP_UP_CLASS,     // situp_up
-        CHEST_PRESS_CLASS,  // chestpress_down
-        DEAD_LIFT_CLASS,    // deadlift_down
-        SHOULDER_PRESS_CLASS // shoulderpress_down
+        PUSHUPS_CLASS,
+        SQUATS_CLASS,
+        LUNGES_CLASS,
+        SITUP_UP_CLASS,
+        CHEST_PRESS_CLASS,
+        DEAD_LIFT_CLASS,
+        SHOULDER_PRESS_CLASS
     )
 
     private fun mapExerciseNameToClass(exerciseName: String): String? {
@@ -100,9 +102,9 @@ class RecordActivity : AppCompatActivity() {
             "Squat" -> SQUATS_CLASS
             "Lunges" -> LUNGES_CLASS
             "Sit-up" -> SITUP_UP_CLASS
-            "Chest press" -> CHEST_PRESS_CLASS    // chestpress_down
-            "Dead lift" -> DEAD_LIFT_CLASS       // deadlift_down
-            "Shoulder press" -> SHOULDER_PRESS_CLASS // shoulderpress_down
+            "Chest press" -> CHEST_PRESS_CLASS
+            "Dead lift" -> DEAD_LIFT_CLASS
+            "Shoulder press" -> SHOULDER_PRESS_CLASS
             else -> null
         }.also {
             Log.d(TAG, "Mapped exercise '$exerciseName' to class name: $it")
@@ -141,6 +143,8 @@ class RecordActivity : AppCompatActivity() {
     }
 
     private fun showPlanDialog() {
+        if (supportFragmentManager.findFragmentByTag(ShowPlanDialog.TAG) != null) return
+
         val dialog = ShowPlanDialog().apply {
             exerciseSelectedListener = object : OnTodayExerciseSelectedListener {
                 override fun onExerciseSelected(exercise: TodayExerciseDomain) {
@@ -154,14 +158,13 @@ class RecordActivity : AppCompatActivity() {
     private fun setupExerciseUI(exercise: TodayExerciseDomain) {
         binding.apply {
             tvExerciseName.text = exercise.exercise.name
-            exercise.reps
+            // Gunakan current set yang sudah ada, jika belum ada baru set ke 1
+            tvSetsNumber.text = currentSetNumber.toString()
             tvRepsNumber.text = "0"
-            tvSetsNumber.text = "1"
             tvWorkoutStatus.text = "Ready"
             tvWorkoutConfidence.text = "Position yourself correctly"
             tvWorkoutGuide.text = "Waiting for pose detection..."
 
-            // Start timer
             startMediaTimer()
             tvTimer.visibility = View.VISIBLE
         }
@@ -220,6 +223,10 @@ class RecordActivity : AppCompatActivity() {
             ).show()
             finish()
         }
+        Handler(Looper.getMainLooper()).postDelayed({
+            isWorkoutInProgress = true // Set true saat workout dimulai
+            cameraXViewModel.triggerClassification.value = true
+        }, 1000)
     }
 
     private fun bindAllCameraUseCases() {
@@ -376,6 +383,13 @@ class RecordActivity : AppCompatActivity() {
 
     private fun setupObservers() {
         cameraXViewModel.postureLiveData.observe(this) { postureResults ->
+            if (isRestDialogShowing || !isWorkoutInProgress || supportFragmentManager.findFragmentByTag(
+                    RestDialog.TAG
+                ) != null || binding.tvRepsNumber.text.toString().toInt() >= (selectedExercise?.reps
+                    ?: 0)
+            ) return@observe
+
+
             Log.d(TAG, "Received posture results: $postureResults")
 
             selectedExercise?.let { exercise ->
@@ -396,12 +410,15 @@ class RecordActivity : AppCompatActivity() {
                             tvWorkoutConfidence.text = String.format("Confidence: %.1f%%", result.confidence * 100)
 
                             if (result.repetition == exercise.reps) {
+                                // Nonaktifkan observer terlebih dahulu
+                                isWorkoutInProgress = false
+
                                 // Disable pose detection sementara
                                 cameraXViewModel.triggerClassification.value = false
 
                                 val currentSet = tvSetsNumber.text.toString().toInt()
 
-                                if (currentSet == exercise.sets) {
+                                if (currentSet >= exercise.sets) {
                                     // Exercise selesai karena set sudah terpenuhi
 
                                     // TODO: Kirim data hasil exercise ke ViewModel
@@ -413,11 +430,14 @@ class RecordActivity : AppCompatActivity() {
                                     //     duration: String
                                     // )
 
+//                                    handleExerciseCompletion()
                                     // Reset UI dan tampilkan dialog exercise berikutnya
                                     showPlanDialog()
                                 } else {
-                                    // Masih ada set berikutnya, tampilkan dialog rest
-                                    showRestDialog(currentSet + 1)
+                                    if (!isRestDialogShowing && supportFragmentManager.findFragmentByTag(RestDialog.TAG) == null) {
+                                        isRestDialogShowing = true
+                                        showRestDialog(currentSet + 1, exercise)
+                                    }
                                 }
                             }
 
@@ -446,40 +466,37 @@ class RecordActivity : AppCompatActivity() {
         }
     }
 
-    // Tambahkan fungsi untuk menampilkan dialog rest
-    private fun showRestDialog(nextSet: Int) {
+    private fun showRestDialog(nextSet: Int, exercise: TodayExerciseDomain) {
         val dialog = RestDialog(
             nextSet = nextSet,
             onContinueClicked = {
-                // Resume main timer
+                isRestDialogShowing = false
+
+                currentSetNumber = nextSet
+
+                Toast.makeText(
+                    this,
+                    "Anda hebat! 1 set gerakan ${exercise.exercise.name} telah dilakukan",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                binding.apply {
+                    tvSetsNumber.text = currentSetNumber.toString()
+                    tvRepsNumber.text = "0"
+                    tvWorkoutStatus.text = "Ready"
+                    tvWorkoutConfidence.text = "Position yourself correctly"
+                    tvWorkoutGuide.text = "Waiting for pose detection..."
+                }
+
                 startMediaTimer()
 
-                // Increment and update set number
-                binding.tvSetsNumber.text = nextSet.toString()
-
-                // Reset reps counter
-                binding.tvRepsNumber.text = "0"
-
-                // Re-enable pose detection
+                isWorkoutInProgress = true
                 cameraXViewModel.triggerClassification.value = true
             }
         )
 
-        // Pause main timer
         mRecTimer?.cancel()
-
         dialog.show(supportFragmentManager, RestDialog.TAG)
-    }
-
-    private fun handleExerciseCompletion() {
-        binding.apply {
-            tvWorkoutStatus.text = "Exercise Complete!"
-            tvWorkoutGuide.text = "Great job!"
-        }
-        // Stop pose detection
-        cameraXViewModel.triggerClassification.value = false
-
-        // Tambahkan logika untuk menyimpan hasil exercise jika diperlukan
     }
 
     private fun handleExerciseSelection(exercise: TodayExerciseDomain) {
@@ -490,7 +507,12 @@ class RecordActivity : AppCompatActivity() {
             Log.d(TAG, "Valid exercise selected: $exerciseClass")
             isExerciseSelected = true
             selectedExercise = exercise
+
             setupExerciseUI(exercise)
+
+            // Reset semua state
+            isRestDialogShowing = false
+            isWorkoutInProgress = false
             setupInitialState()
         } else {
             Log.d(TAG, "Invalid exercise: ${exercise.exercise.name}")

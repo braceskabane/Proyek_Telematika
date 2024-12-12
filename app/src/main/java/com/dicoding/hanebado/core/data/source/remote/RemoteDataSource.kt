@@ -13,6 +13,7 @@ import com.dicoding.hanebado.core.data.source.remote.response.dailyplan.DailyPla
 import com.dicoding.hanebado.core.data.source.remote.response.dailyplan.GetAllDailyResponse
 import com.dicoding.hanebado.core.data.source.remote.response.dailyplan.GetTodayResponse
 import com.dicoding.hanebado.core.data.source.remote.response.exercise.ExerciseResponse
+import com.dicoding.hanebado.core.data.source.remote.response.histories.HistoryResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -209,5 +210,21 @@ class RemoteDataSource @Inject constructor(private val apiService: ApiService) {
             }
         }.flowOn(Dispatchers.IO)
     }
+
+    // History
+    suspend fun getHistory(): Flow<ApiResponse<HistoryResponse>> = flow {
+        try {
+            Log.d("RemoteDataSource", "Fetching history")
+            val response = apiService.history()
+            emit(ApiResponse.Success(response))
+            Log.d("RemoteDataSource", "Successfully fetched history: $response")
+        } catch (e: HttpException) {
+            Log.e("RemoteDataSource", "HTTP error when fetching history: ${e.code()}, ${e.message()}")
+            emit(ApiResponse.Error(e))
+        } catch (e: Exception) {
+            Log.e("RemoteDataSource", "Error when fetching history: ${e.message}")
+            emit(ApiResponse.Error(e))
+        }
+    }.flowOn(Dispatchers.IO)
 
 }

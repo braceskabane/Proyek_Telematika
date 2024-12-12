@@ -7,7 +7,7 @@ import com.dicoding.hanebado.view.dashboard.record.classification.PoseClassifier
 import com.dicoding.hanebado.view.dashboard.record.classification.PostureResult
 import com.dicoding.hanebado.view.dashboard.record.graphic.GraphicOverlay
 import com.dicoding.hanebado.view.dashboard.record.util.VisionProcessorBase
-import com.example.poseexercise.views.graphic.PoseGraphic
+import com.dicoding.hanebado.view.dashboard.record.graphic.PoseGraphic
 import com.google.android.gms.tasks.Task
 import com.google.android.odml.image.MlImage
 import com.google.mlkit.vision.common.InputImage

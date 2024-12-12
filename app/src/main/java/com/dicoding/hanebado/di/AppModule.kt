@@ -6,6 +6,8 @@ import com.dicoding.hanebado.core.domain.dailyplan.interactor.DailyPlanInteracto
 import com.dicoding.hanebado.core.domain.dailyplan.usecase.DailyPlanUseCase
 import com.dicoding.hanebado.core.domain.exercise.interactor.ExerciseInteractor
 import com.dicoding.hanebado.core.domain.exercise.usecase.ExerciseUseCase
+import com.dicoding.hanebado.core.domain.histories.interactor.HistoryInteractor
+import com.dicoding.hanebado.core.domain.histories.usecase.HistoryUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -27,4 +29,8 @@ abstract class AppModule {
     @Binds
     @Singleton
     abstract fun provideExerciseUseCase(exerciseInteractor: ExerciseInteractor): ExerciseUseCase
+
+    @Binds
+    @Singleton
+    abstract fun provideHistoryUseCase(historyInteractor: HistoryInteractor): HistoryUseCase
 }

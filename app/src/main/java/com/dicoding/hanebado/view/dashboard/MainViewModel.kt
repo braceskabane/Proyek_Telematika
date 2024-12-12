@@ -25,11 +25,9 @@ class MainViewModel @Inject constructor(
 
     private fun checkAuthenticationStatus() {
         viewModelScope.launch {
-            // Periksa token terlebih dahulu
             authUseCase.getAccessToken().collect { token ->
                 Log.d("MainViewModel", "Current token: ${token.take(10)}...")
                 if (token.isNotEmpty()) {
-                    // Jika token ada, periksa login status
                     authUseCase.getLoginStatus().collect { isLoggedIn ->
                         Log.d("MainViewModel", "Login status: $isLoggedIn")
                         _isAuthenticated.value = isLoggedIn && token.isNotEmpty()

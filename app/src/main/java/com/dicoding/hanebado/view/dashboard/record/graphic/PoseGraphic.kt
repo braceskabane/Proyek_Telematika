@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.example.poseexercise.views.graphic
+package com.dicoding.hanebado.view.dashboard.record.graphic
 
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import com.dicoding.hanebado.view.dashboard.record.graphic.GraphicOverlay
 import com.google.mlkit.vision.pose.Pose
 import com.google.mlkit.vision.pose.PoseLandmark
 import java.util.Locale
