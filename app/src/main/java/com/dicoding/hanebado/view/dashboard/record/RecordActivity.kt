@@ -471,8 +471,10 @@ class RecordActivity : AppCompatActivity() {
             nextSet = nextSet,
             onContinueClicked = {
                 isRestDialogShowing = false
-
                 currentSetNumber = nextSet
+
+                // Reset repetition counter
+                (imageProcessor as? PoseDetectorProcessor)?.resetRepetitionCount()
 
                 Toast.makeText(
                     this,
@@ -490,6 +492,7 @@ class RecordActivity : AppCompatActivity() {
 
                 startMediaTimer()
 
+                // Pastikan reset counter selesai sebelum memulai deteksi baru
                 isWorkoutInProgress = true
                 cameraXViewModel.triggerClassification.value = true
             }

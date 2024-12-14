@@ -57,4 +57,9 @@ public class RepetitionCounter {
     public int getNumRepeats() {
         return numRepeats;
     }
+
+    public void reset() {
+        numRepeats = 0;
+        poseEntered = false;
+    }
 }

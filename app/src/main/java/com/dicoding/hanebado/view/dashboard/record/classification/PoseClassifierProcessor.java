@@ -267,4 +267,21 @@ public class PoseClassifierProcessor {
 
         return postureResults;
     }
+
+    public void resetRepetitions() {
+        // Reset all repetition counters
+        if (isStreamMode && repCounters != null) {
+            for (RepetitionCounter counter : repCounters) {
+                counter.reset();
+            }
+        }
+
+        // Clear or reset the posture results map
+        if (postureResults != null) {
+            postureResults.clear();
+        }
+
+        Log.d(TAG, "Reset all repetition counters and posture results");
+    }
+
 }

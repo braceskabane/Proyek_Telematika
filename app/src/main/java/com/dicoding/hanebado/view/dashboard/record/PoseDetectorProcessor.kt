@@ -6,8 +6,8 @@ import com.dicoding.hanebado.core.data.source.local.entity.plan.Plan
 import com.dicoding.hanebado.view.dashboard.record.classification.PoseClassifierProcessor
 import com.dicoding.hanebado.view.dashboard.record.classification.PostureResult
 import com.dicoding.hanebado.view.dashboard.record.graphic.GraphicOverlay
-import com.dicoding.hanebado.view.dashboard.record.util.VisionProcessorBase
 import com.dicoding.hanebado.view.dashboard.record.graphic.PoseGraphic
+import com.dicoding.hanebado.view.dashboard.record.util.VisionProcessorBase
 import com.google.android.gms.tasks.Task
 import com.google.android.odml.image.MlImage
 import com.google.mlkit.vision.common.InputImage
@@ -68,6 +68,11 @@ class PoseDetectorProcessor(
         super.stop()
         detector.close()
         cameraXViewModel = null
+    }
+
+    fun resetRepetitionCount() {
+        poseClassifierProcessor?.resetRepetitions()
+        Log.d(TAG, "Reset repetition count in PoseDetectorProcessor")
     }
 
     override fun detectInImage(image: InputImage): Task<PoseWithClassification> {
