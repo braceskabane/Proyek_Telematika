@@ -63,7 +63,6 @@ class PoseDetectorProcessor(
         }
     }
 
-
     override fun stop() {
         super.stop()
         detector.close()

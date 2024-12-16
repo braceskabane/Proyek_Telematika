@@ -10,7 +10,6 @@ import javax.inject.Inject
 
 class AuthInterceptor @Inject constructor(private val datastoreManager: DataStoreManager) :
     Interceptor {
-
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
         val requestUrl = originalRequest.url.toString()

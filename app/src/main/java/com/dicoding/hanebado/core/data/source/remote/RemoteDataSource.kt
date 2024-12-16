@@ -14,6 +14,7 @@ import com.dicoding.hanebado.core.data.source.remote.response.dailyplan.GetAllDa
 import com.dicoding.hanebado.core.data.source.remote.response.dailyplan.GetTodayResponse
 import com.dicoding.hanebado.core.data.source.remote.response.exercise.ExerciseResponse
 import com.dicoding.hanebado.core.data.source.remote.response.histories.HistoryResponse
+import com.dicoding.hanebado.core.data.source.remote.response.session.ResponseSession
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -223,6 +224,25 @@ class RemoteDataSource @Inject constructor(private val apiService: ApiService) {
             emit(ApiResponse.Error(e))
         } catch (e: Exception) {
             Log.e("RemoteDataSource", "Error when fetching history: ${e.message}")
+            emit(ApiResponse.Error(e))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    // SaveExercise
+    suspend fun exerciseSave(dailyPlanId: Int, exerciseId: Int, setNumber: Int, reps: Int, duration: Int): Flow<ApiResponse<ResponseSession>> = flow {
+        try {
+            Log.d("RemoteDataSource", "Starting exercise session with dailyPlanId=$dailyPlanId, exerciseId=$exerciseId, setNumber=$setNumber")
+
+            val response = apiService.exerciseSave(dailyPlanId, exerciseId, setNumber, reps, duration)
+            emit(ApiResponse.Success(response))
+
+            Log.d("RemoteDataSource", "Successfully saved exercise session: $response")
+
+        } catch (e: HttpException) {
+            Log.e("RemoteDataSource", "HTTP error when saving exercise: ${e.code()}, ${e.message()}")
+            emit(ApiResponse.Error(e))
+        } catch (e: Exception) {
+            Log.e("RemoteDataSource", "Error when saving exercise: ${e.javaClass.simpleName}, ${e.message}")
             emit(ApiResponse.Error(e))
         }
     }.flowOn(Dispatchers.IO)

@@ -21,8 +21,8 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080\"")
-//        buildConfigField("String", "BASE_URL", "\"http://192.168.70.201:8080\"")
+//        buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080\"")
+        buildConfigField("String", "BASE_URL", "\"https://6vbwxmx7-8080.asse.devtunnels.ms/\"")
 //        buildConfigField("String", "BASE_URL", "\"http://192.168.69.201:8080\"")
 //        buildConfigField("String", "BASE_URL", "\"http://192.168.30.49:8080\"")
 

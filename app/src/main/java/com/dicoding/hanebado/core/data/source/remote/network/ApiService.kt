@@ -12,6 +12,7 @@ import com.dicoding.hanebado.core.data.source.remote.response.dailyplan.GetAllDa
 import com.dicoding.hanebado.core.data.source.remote.response.dailyplan.GetTodayResponse
 import com.dicoding.hanebado.core.data.source.remote.response.exercise.ExerciseResponse
 import com.dicoding.hanebado.core.data.source.remote.response.histories.HistoryResponse
+import com.dicoding.hanebado.core.data.source.remote.response.session.ResponseSession
 import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -62,39 +63,41 @@ interface ApiService {
     ): ActiveResponse
 
     //////////////////////////////////////////// Daily Plan
-    @POST("/daily-plans")
+    @POST("daily-plans")
     suspend fun sendDailyPlan(
         @Body dailyPlanRequest: DailyPlanRequest
     ): AddDailyPlanResponse
 
-    @GET("/daily-plans/")
+    @GET("daily-plans/")
     suspend fun getAllDailyPlan(
 
     ): GetAllDailyResponse
 
-    @GET("/daily-plans/today")
+    @GET("daily-plans/today")
     suspend fun getTodayDailyPlan(
 
     ): GetTodayResponse
 
     //////////////////////////////////////////// Exercise
-    @GET("/exercises")
+    @GET("exercises")
     suspend fun allExercise(
         // Masukkan token yang didapat saat login
     ):ExerciseResponse
 
     // Histories
-    @GET("/history/")
+    @GET("history/")
     suspend fun history(): HistoryResponse
 
     //////////////////////////////////////////// Session
     @FormUrlEncoded
-    @POST("/sessions/start")
+    @POST("sessions/complete")
     suspend fun exerciseSave(
-        @Field("dailyPlanId") dailyPlanId: String,
-        @Field("exerciseId") exerciseId: String,
-        @Field("setNumber") setNumber: String,
-    ): OtpResponse
+        @Field("dailyPlanId") dailyPlanId: Int,
+        @Field("exerciseId") exerciseId: Int,
+        @Field("setNumber") setNumber: Int,
+        @Field("reps") reps: Int,
+        @Field("duration") duration: Int,
+    ): ResponseSession
 
     ///////////////////////////////////////////////////////////////////////////////
 

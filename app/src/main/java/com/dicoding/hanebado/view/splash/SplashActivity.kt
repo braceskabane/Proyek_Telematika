@@ -3,17 +3,24 @@ package com.dicoding.hanebado.view.splash
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.dicoding.hanebado.R
+import com.dicoding.hanebado.view.dashboard.MainActivity
 import com.dicoding.hanebado.view.welcome.WelcomeActivity
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @SuppressLint("CustomSplashScreen")
+@AndroidEntryPoint
 class SplashActivity : AppCompatActivity() {
+    private val viewModel: SplashViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -25,16 +32,26 @@ class SplashActivity : AppCompatActivity() {
         }
 
         setupActionBar()
-
-        move()
+        checkAuthAndNavigate()
     }
 
-    private fun move(){
-        Handler(Looper.getMainLooper()).postDelayed({
-            val intent = Intent(this@SplashActivity, WelcomeActivity::class.java)
-            startActivity(intent)
-            finish()
-        }, DELAY.toLong())
+    private fun checkAuthAndNavigate() {
+        lifecycleScope.launch {
+            delay(DELAY.toLong())
+
+            viewModel.isLoggedIn.collect { isLoggedIn ->
+                isLoggedIn?.let {
+                    val targetActivity = if (it) {
+                        MainActivity::class.java
+                    } else {
+                        WelcomeActivity::class.java
+                    }
+
+                    startActivity(Intent(this@SplashActivity, targetActivity))
+                    finish()
+                }
+            }
+        }
     }
 
     private fun setupActionBar() {

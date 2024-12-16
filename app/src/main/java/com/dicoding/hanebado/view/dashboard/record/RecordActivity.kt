@@ -9,6 +9,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
@@ -21,7 +22,9 @@ import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.dicoding.hanebado.R
+import com.dicoding.hanebado.core.data.source.Resource
 import com.dicoding.hanebado.core.data.source.local.entity.plan.Plan
 import com.dicoding.hanebado.core.domain.dailyplan.model.TodayExerciseDomain
 import com.dicoding.hanebado.databinding.ActivityRecordBinding
@@ -32,6 +35,7 @@ import com.dicoding.hanebado.view.dashboard.record.preference.PreferenceUtils
 import com.dicoding.hanebado.view.dashboard.record.util.VisionImageProcessor
 import com.google.mlkit.common.MlKitException
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.util.Timer
 import java.util.TimerTask
 import java.util.concurrent.ExecutorService
@@ -41,6 +45,7 @@ import java.util.concurrent.Executors
 @AndroidEntryPoint
 class RecordActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRecordBinding
+    private val recordViewModel: RecordViewModel by viewModels()
     private lateinit var cameraXViewModel: CameraXViewModel
     private lateinit var backgroundExecutor: ExecutorService
     private var previewView: PreviewView? = null
@@ -60,6 +65,7 @@ class RecordActivity : AppCompatActivity() {
     private var isExerciseSelected = false
 
     private var restTimer: CountDownTimer? = null
+    private var lastDurationInSeconds = 0
 
     private var isRestDialogShowing = false
     private var isWorkoutInProgress = false
@@ -158,6 +164,7 @@ class RecordActivity : AppCompatActivity() {
     private fun setupExerciseUI(exercise: TodayExerciseDomain) {
         binding.apply {
             tvExerciseName.text = exercise.exercise.name
+
             // Gunakan current set yang sudah ada, jika belum ada baru set ke 1
             tvSetsNumber.text = currentSetNumber.toString()
             tvRepsNumber.text = "0"
@@ -390,6 +397,7 @@ class RecordActivity : AppCompatActivity() {
             ) return@observe
 
 
+
             Log.d(TAG, "Received posture results: $postureResults")
 
             selectedExercise?.let { exercise ->
@@ -421,14 +429,20 @@ class RecordActivity : AppCompatActivity() {
                                 if (currentSet >= exercise.sets) {
                                     // Exercise selesai karena set sudah terpenuhi
 
-                                    // TODO: Kirim data hasil exercise ke ViewModel
-                                    // Rekomendasi: Buat fungsi di ViewModel seperti
-                                    // fun saveExerciseResult(
-                                    //     exerciseName: String,
-                                    //     totalSets: Int,
-                                    //     totalReps: Int,
-                                    //     duration: String
-                                    // )
+                                    if (currentSet >= exercise.sets) {
+                                        // Exercise selesai karena set sudah terpenuhi
+                                        selectedExercise?.let { exercise ->
+                                            val duration = lastDurationInSeconds
+                                            recordViewModel.startExerciseSession(
+                                                dailyPlanId = exercise.dailyPlanId,
+                                                exerciseId = exercise.exerciseId,
+                                                setNumber = exercise.sets,
+                                                reps = exercise.reps,
+                                                duration = duration // Kirim durasi terakhir
+                                            )
+                                        }
+                                        // Tidak perlu showPlanDialog() di sini karena sudah ditangani di observer
+                                    }
 
 //                                    handleExerciseCompletion()
                                     // Reset UI dan tampilkan dialog exercise berikutnya
@@ -460,6 +474,30 @@ class RecordActivity : AppCompatActivity() {
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+        lifecycleScope.launch {
+            recordViewModel.sessionDomainState.collect { state ->
+                when (state) {
+                    is Resource.Success -> {
+                        Log.d(TAG, "Session saved successfully: ${state.data}")
+                        showPlanDialog()
+                    }
+                    is Resource.Error -> {
+                        Log.e(TAG, "Error saving session: ${state.message}")
+                        Toast.makeText(
+                            this@RecordActivity,
+                            "Failed to save session: ${state.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    is Resource.Loading -> {
+                        Log.d(TAG, "Saving session...")
+                    }
+                    is Resource.Message -> {
+                        Log.d(TAG, "Session message: ${state.message}")
                     }
                 }
             }
@@ -531,6 +569,7 @@ class RecordActivity : AppCompatActivity() {
     private fun startMediaTimer() {
         val pushTask: TimerTask = object : TimerTask() {
             override fun run() {
+                lastDurationInSeconds++
                 mRecSeconds++
                 if (mRecSeconds >= 60) {
                     mRecSeconds = 0
@@ -548,14 +587,17 @@ class RecordActivity : AppCompatActivity() {
         mRecTimer?.schedule(pushTask, 1000, 1000)
     }
 
+
     private fun stopMediaTimer() {
         mRecTimer?.cancel()
         mRecTimer = null
+        lastDurationInSeconds += mRecHours * 3600 + mRecMinute * 60 + mRecSeconds
         mRecHours = 0
         mRecMinute = 0
         mRecSeconds = 0
         mMainHandler.sendEmptyMessage(WHAT_STOP_TIMER)
     }
+
 
     private fun calculateTime(seconds: Int, minute: Int, hour: Int = 0): String {
         return String.format("%02d:%02d:%02d", hour, minute, seconds)
